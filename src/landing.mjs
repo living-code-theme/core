@@ -26,7 +26,9 @@ export function landingFiles(flavors, { readme }) {
     glyphs: GLYPHS,
     flavors: flavors.map((f) => ({
       ...f,
-      contrastToBase: Object.fromEntries(Object.keys(f.colors).map((name) => [name, contrast(f.raw[name], f.raw.base)])),
+      // V8 versions can differ in the last floating-point digits. Canonicalize only the export;
+      // build.mjs still audits the unrounded measurements against MINIMUM_CONTRAST.
+      contrastToBase: Object.fromEntries(Object.keys(f.colors).map((name) => [name, +contrast(f.raw[name], f.raw.base).toFixed(10)])),
     })),
   };
   // Functions are deliberately absent from JSON. The consumer adds only its small color accessors.

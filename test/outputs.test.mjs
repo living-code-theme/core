@@ -43,7 +43,7 @@ test("CSS variables declare every color and non-self-referencing role, with an a
   assert.deepEqual(exportFiles(flavors).map((file) => file.path), ["palette.json", "living-code.css"]);
 });
 
-test("landing snapshot preserves every resolved palette value, glyph and exact contrast measurement", () => {
+test("landing snapshot preserves palette values and glyphs with runtime-stable contrast measurements", () => {
   assert.equal(read("exports/landing/theme.json"), files[0].content);
   assert.equal(read("exports/landing/theme.css"), themeCss(flavors));
   assert.equal(snapshot.schemaVersion, 1);
@@ -55,7 +55,11 @@ test("landing snapshot preserves every resolved palette value, glyph and exact c
   for (const f of flavors) {
     const { contrastToBase, ...palette } = snapshot.flavors.find((entry) => entry.id === f.id);
     assert.deepEqual(palette, JSON.parse(JSON.stringify(f)), f.id);
-    for (const name of Object.keys(f.colors)) assert.equal(contrastToBase[name], contrast(f.raw[name], f.raw.base), `${f.id}.${name}`);
+    for (const name of Object.keys(f.colors)) {
+      const measured = contrast(f.raw[name], f.raw.base);
+      assert.equal(contrastToBase[name], +measured.toFixed(10), `${f.id}.${name}: canonical precision`);
+      assert.ok(Math.abs(contrastToBase[name] - measured) <= 5.1e-11, `${f.id}.${name}: retains measurement accuracy`);
+    }
   }
   // The landing links to these README sections.
   for (const anchor of ["using-the-palette-in-something-else", "contributing-a-port"]) assert.ok(snapshot.documentationAnchors.includes(anchor), anchor);
