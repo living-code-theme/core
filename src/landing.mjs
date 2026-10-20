@@ -1,5 +1,6 @@
 // Core → landing export. The landing commits these files and never imports core modules at build time.
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { contrast } from "./color.mjs";
 import { GLYPHS } from "./glyphs.mjs";
 import { themeCss } from "./outputs.mjs";
@@ -37,5 +38,6 @@ export function landingFiles(flavors, { readme }) {
   return [
     { path: "exports/landing/theme.json", content: JSON.stringify(snapshot, null, 2) + "\n" },
     { path: "exports/landing/theme.css", content: css },
+    { path: "exports/landing/port.schema.json", content: readFileSync(new URL("../schemas/port.schema.json", import.meta.url), "utf8") },
   ];
 }

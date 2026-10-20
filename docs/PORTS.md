@@ -4,28 +4,35 @@ Every Living Code port is a public repository in [living-code-theme](https://git
 theme files, README, screenshots, metadata, version and workflows. A valid root `port.json` opts it into
 [living-code.dev](https://living-code.dev): there is no central list to edit and no token to install in the port.
 
-The tooling referenced below (schema, README template, scaffold and local preview) lives in the
-[landing repository](https://github.com/living-code-theme/landing).
+Core owns the schema, README template, scaffold, discovery and local-preview tooling. Install its dependencies
+with `pnpm install --frozen-lockfile` and run the commands below from this checkout. The
+[landing repository](https://github.com/living-code-theme/landing) only renders committed website inputs; it does not
+run maintainer tooling or import core during a build.
 
 ## Add a port
 
-1. Scaffold the documentation and metadata in an empty directory, from a landing checkout:
+1. Scaffold the documentation and metadata in an empty directory, from this core checkout:
 
    ```sh
    pnpm new:port ../kitty --name "Kitty" --group "Terminals" --emoji "🐈"
    # Optional: --slug existing-route --flavors night,paper --no-images
    ```
 
-   It creates a README from the shared template, `port.json`, the local JSON schema, the MIT license and capture
-   instructions. It refuses non-empty directories. It does not write the theme itself.
+   It creates a README from the shared template, `port.json` referencing the hosted schema, the MIT license and an
+   empty `images/` directory. It refuses non-empty directories. It does not write the theme itself.
 2. Add the theme files. Take every color from a semantic role in [`palette.json`](../palette.json), never from a
    hand-picked hex value, so the same kind of token gets the same color in every app.
 3. Add real screenshots of the application (never mockups) and fill in every README placeholder.
-4. Preview it on the website without publishing, from the landing checkout:
+4. Preview it on the website without publishing, from this core checkout. Pass an existing landing checkout explicitly:
 
    ```sh
-   pnpm preview:port ../kitty
+   pnpm preview:port ../kitty --landing ../landing
+   # Optional: --port 4412
    ```
+
+   This validates the draft through discovery and installs/builds an isolated website copy. It does not fetch GitHub
+   or edit the production catalog. The page is marked as a local preview; source links use a local fingerprint,
+   not a published commit. Re-run after editing the port.
 
 5. Create the repository in the organization and push its default branch. The next discovery lists it.
 
@@ -47,7 +54,7 @@ LICENSE
 
 ```json
 {
-  "$schema": "./port.schema.json",
+  "$schema": "https://living-code.dev/port.schema.json",
   "schemaVersion": 1,
   "name": "Neovim",
   "emoji": "📝",
@@ -65,7 +72,9 @@ LICENSE
 }
 ```
 
-The machine-readable contract is the landing's `port.schema.json`; discovery also checks repository paths and images.
+The machine-readable contract is core's [`schemas/port.schema.json`](../schemas/port.schema.json); discovery also
+checks repository paths and images. `pnpm build` exports the schema to `exports/landing/port.schema.json`.
+The website serves a committed copy at <https://living-code.dev/port.schema.json>; ports do not need a local copy.
 
 - Required: `schemaVersion`, `name`, `group`, `flavors`, `images` (`[]` when there are no captures yet).
 - `slug` defaults to the repository name. Set it when they differ (`nvim` → `neovim`, `palette` → `json`). Published
@@ -108,12 +117,37 @@ Limits: 32 KiB metadata, 512 KiB README, 10 MiB and 20 million pixels per image,
 
 ## Discovery
 
-The landing periodically lists the organization's public repositories, reads `port.json`, the README, listed files and
-screenshots from **one commit** of each, and commits a validated snapshot. Visitors never query GitHub.
+Run discovery from core against an explicit website checkout:
+
+```sh
+GH_TOKEN="$(gh auth token)" pnpm sync:ports --landing ../landing --dry-run
+GH_TOKEN="$(gh auth token)" pnpm sync:ports --landing ../landing
+# Optional: --refresh to revalidate and redownload unchanged commits
+```
+
+Core lists the organization's public repositories and reads `port.json`, the README, listed files and screenshots
+from **one commit** of each. Review and commit the resulting `data/ports.json` and `public/port-images/` in landing.
+Authentication is optional for public repositories; it raises rate limits. Visitors never query GitHub. No scheduled
+cross-repository delivery is configured here.
 
 - No `port.json`: not opted in. A new invalid port is reported and skipped.
 - A malformed update, timeout or unreadable capture keeps that port's last working snapshot.
 - Archiving or deleting a repository, making it private, or removing `port.json` removes it from the website.
+- Incomplete listings, authentication failures and rate limits abort without replacing the snapshot.
+
+## Deliver generated website inputs
+
+```sh
+pnpm build
+pnpm export:landing --landing ../landing
+pnpm test:standalone --landing ../landing
+# Optional: --keep to retain the isolated verification checkout
+```
+
+The export copies theme JSON, matching CSS and the hosted port schema, never discovered content or legacy inputs.
+Review and commit the delivered files in landing. The standalone runner installs, builds and tests an isolated copy
+of only the website, excluding dependencies, output, caches, credentials and symlinks. Neither command assumes a
+sibling repository or runs during a normal Astro build.
 
 ## After a palette change
 

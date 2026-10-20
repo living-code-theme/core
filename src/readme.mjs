@@ -169,7 +169,8 @@ token gets the same color in every app.
 
 ## Development
 
-Requires Node 22.22 or newer. There are no runtime dependencies.
+Requires Node 22.22 or newer and pnpm 12.9.0. Run \`pnpm install --frozen-lockfile\` for maintainer tooling.
+Palette generation uses only Node built-ins; port tooling dependencies are development-only.
 
 | Command | What it does |
 |---|---|
@@ -179,12 +180,19 @@ Requires Node 22.22 or newer. There are no runtime dependencies.
 | \`pnpm preview\` | Live palette preview with sliders and exports at <http://localhost:4173/preview/>. |
 | \`pnpm screenshots\` | Recaptures \`assets/preview-*.png\` from the preview with headless Chrome (\`CHROME_BIN\` overrides \`google-chrome\`). |
 | \`pnpm icons:brand\` | Rasterizes the brand SVGs to PNG and ICO. See [\`assets/brand\`](assets/brand/README.md). |
+| \`pnpm new:port <directory> --name "App" --group "Editors" --emoji "📝"\` | Scaffolds a port's README, metadata and license. |
+| \`pnpm sync:ports --landing <checkout>\` | Discovers public ports and writes validated snapshots/captures to the website. Supports \`--dry-run\` and \`--refresh\`. |
+| \`pnpm preview:port <directory> --landing <checkout>\` | Validates a local port and previews it in an isolated website copy. |
+| \`pnpm export:landing --landing <checkout>\` | Delivers the generated theme JSON, CSS and hosted port schema to the website. Run \`pnpm build\` first. |
+| \`pnpm test:standalone --landing <checkout>\` | Installs, builds and tests only the website in isolation. Supports \`--keep\`. |
 
 To change a color, edit [\`palette/flavors.mjs\`](palette/flavors.mjs) and run \`pnpm build\`. Do not edit generated files directly.
 
 A palette change does not touch any port: each port repository owns its files and updates them in its own pull request.
-The website takes the theme from [\`exports/landing/\`](exports/landing): copy \`theme.json\` to the landing's
-\`data/theme.json\` and \`theme.css\` to \`src/styles/theme.css\`.
+The website takes committed inputs from [\`exports/landing/\`](exports/landing). After \`pnpm build\`, run
+\`pnpm export:landing --landing <checkout>\` and review the changes there. Port discovery, validation, templates and
+preview/verification runners live here in core; landing contains Astro and website presentation only. No normal
+website build imports core or needs GitHub access. See [Port repositories](docs/PORTS.md) for the full workflow.
 
 ## License
 

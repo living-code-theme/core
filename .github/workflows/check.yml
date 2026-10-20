@@ -9,6 +9,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 24 }
+      - uses: pnpm/action-setup@v4
+      - name: Install tooling dependencies
+        run: pnpm install --frozen-lockfile
       # Fails if a generated file is out of date with palette/flavors.mjs,
       # or if a text role drops below WCAG AA contrast.
       - name: Check generated files and palette contrast

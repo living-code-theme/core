@@ -68,6 +68,7 @@ test("landing export is deterministic and its fingerprint changes with the palet
 });
 
 test("the core stays app-agnostic and self-contained", () => {
+  const pkg = JSON.parse(read("package.json"));
   const sources = (dir) => readdirSync(join(root, dir), { recursive: true }).filter((path) => /\.(mjs|md|json|html|css|yml)$/.test(path)).map((path) => `${dir}/${path}`);
   for (const path of [...sources("src"), ...sources("scripts"), ...sources("preview"), ...sources("docs"), ...sources("exports"), "README.md", "package.json"]) {
     const text = read(path);
@@ -75,8 +76,15 @@ test("the core stays app-agnostic and self-contained", () => {
     // Links stay inside the organization (font license credits excepted).
     for (const [, owner] of text.matchAll(/github\.com\/([\w.-]+)/g)) assert.ok(["living-code-theme", "orgs"].includes(owner), `${path} links to github.com/${owner}`);
     if (path.endsWith(".mjs")) for (const [, specifier] of text.matchAll(/\bfrom\s+["']([^"']+)["']/g)) {
-      assert.ok(specifier.startsWith("node:") || specifier.startsWith("."), `${path} imports ${specifier}`);
+      assert.ok(specifier.startsWith("node:") || specifier.startsWith(".") || Object.hasOwn(pkg.devDependencies, specifier), `${path} imports undeclared dependency ${specifier}`);
     }
   }
-  assert.deepEqual(JSON.parse(read("package.json")).dependencies ?? {}, {});
+  assert.deepEqual(pkg.dependencies ?? {}, {}, "palette generation remains dependency-free; maintainer tooling uses dev dependencies");
+});
+
+test("the website schema export is byte-identical to core's canonical contract", () => {
+  const schema = read("schemas/port.schema.json");
+  assert.equal(read("exports/landing/port.schema.json"), schema);
+  assert.equal(files.find((file) => file.path === "exports/landing/port.schema.json").content, schema);
+  assert.equal(JSON.parse(schema).$id, "https://living-code.dev/port.schema.json");
 });

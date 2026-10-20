@@ -14,9 +14,21 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/build.mjs --check",
     "test": "node --test test/*.test.mjs",
+    "test:discovery": "node --test test/discovery.test.mjs test/port-template.test.mjs test/preview-port.test.mjs",
+    "test:standalone": "node scripts/check-standalone.mjs",
+    "new:port": "node scripts/new-port.mjs",
+    "preview:port": "node scripts/preview-port.mjs",
+    "sync:ports": "node scripts/sync-ports.mjs",
+    "export:landing": "node scripts/export-landing.mjs",
     "preview": "node scripts/serve.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "icons:brand": "node scripts/brand-icons.mjs",
     "recolor": "node scripts/recolor.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "marked": "^17.0.6",
+    "sanitize-html": "^2.18.1",
+    "sharp": "0.35.5"
   }
 }
