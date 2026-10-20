@@ -1,0 +1,37 @@
+name: Request a port
+description: Ask for Living Code in an app that does not have a port yet.
+title: "[Port]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [living-code.dev/ports](https://living-code.dev/ports/) first. One app per request, please.
+  - type: input
+    id: app
+    attributes:
+      label: App
+      placeholder: "e.g. Neovide"
+    validations:
+      required: true
+  - type: input
+    id: homepage
+    attributes:
+      label: Homepage
+      placeholder: https://
+    validations:
+      required: true
+  - type: textarea
+    id: theming
+    attributes:
+      label: How does the app load themes?
+      description: A theme file format, a settings page, a plugin or extension store, a documentation link. Anything you know helps.
+    validations:
+      required: false
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Can you help?
+      options:
+        - label: I can test the port and take screenshots of the app.
+        - label: I would like to build the port myself (see Contributing a port in the README).

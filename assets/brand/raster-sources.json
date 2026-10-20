@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "assets/brand/github-avatar.svg": "a4ec4805f3e5f220ec63bd43d4fbc9f8635f573dd33b2a0817bdcc702b11e626",
+    "assets/brand/favicon.svg": "65518333751c7ae41717e1f95778e3a8aaeadc81bbc5dac3b58f4343a1221a48"
+  },
+  "outputs": {
+    "assets/brand/github-avatar.png": "36368f3e2dc805f39892a0fbe5348c7a498f162d6f2143ed8dec3b9fc4de78ce",
+    "assets/brand/apple-touch-icon.png": "8746857957b53d1649bafd16955202585723942e75e3a7fa8e3979d588b16813",
+    "assets/brand/favicon-16.png": "f7443baa615b547a7f3b79b3185f45c44b2adabcff3fb526908430285bf3bb9b",
+    "assets/brand/favicon-32.png": "1ceaf75cd6852fcdb43d2c3e226750aac308779c2e8f31bce2c7c0df47c8b2d6",
+    "assets/brand/favicon-48.png": "aeed2aedbbdb5de99e04253d738edda0546795dc64654c5de2cb11b1b3c3b429",
+    "assets/brand/favicon.ico": "efd7c68a40098315fab626c64a9c97872f7a65c98f6a90b5d5d24a0f824a778a"
+  }
+}

@@ -1,0 +1,17 @@
+name: check
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      # Fails if a generated file is out of date with palette/flavors.mjs,
+      # or if a text role drops below WCAG AA contrast.
+      - name: Check generated files and palette contrast
+        run: node scripts/build.mjs --check
+      - name: Run the test suite
+        run: node --test test/*.test.mjs

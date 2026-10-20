@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Living Code: preview</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 14px/1.6 "Geist", system-ui, sans-serif;
+    background: var(--base);
+    color: var(--text);
+    transition: background .25s, color .25s;
+  }
+  code, pre, .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  header {
+    position: sticky; top: 0; z-index: 2;
+    display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center;
+    padding: 14px 28px;
+    background: color-mix(in oklch, var(--crust) 90%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--surface1);
+  }
+  header h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  header h1 span { color: var(--accent); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tabs button {
+    font: 12px "JetBrains Mono", monospace;
+    padding: 6px 10px; cursor: pointer;
+    background: transparent; color: var(--subtext);
+    border: 1px solid var(--surface1); border-radius: 0;
+  }
+  .tabs button[aria-pressed="true"] { color: var(--base); background: var(--accent); border-color: var(--accent); }
+  .controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; font: 12px "JetBrains Mono", monospace; color: var(--subtext); }
+  .controls label { display: flex; gap: 8px; align-items: center; }
+  .controls input[type=range] { accent-color: var(--accent); width: 110px; }
+  main { max-width: 1240px; margin: 0 auto; padding: 28px; display: grid; gap: 36px; }
+  .idea { border-left: 2px solid var(--accent); padding: 4px 0 4px 16px; color: var(--text2); max-width: 80ch; }
+  .idea b { color: var(--text); }
+  h2 { font: 500 12px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .12em; color: var(--subtext); margin: 0 0 12px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .sw {
+    border: 1px solid var(--surface1); background: var(--mantle);
+    cursor: pointer; text-align: left; color: inherit; padding: 0; font: inherit;
+  }
+  .sw .chip { height: 54px; }
+  .sw .meta { padding: 8px 10px; font: 11px/1.5 "JetBrains Mono", monospace; color: var(--subtext); }
+  .sw .meta b { display: block; color: var(--text); font-weight: 500; }
+  .sw .meta .bad { color: var(--flare); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 20px; }
+  .window { border: 1px solid var(--surface1); background: var(--base); overflow: hidden; }
+  .window .bar {
+    display: flex; gap: 0; background: var(--crust); border-bottom: 1px solid var(--surface1);
+    font: 12px "JetBrains Mono", monospace; color: var(--overlay);
+  }
+  .window .bar span { padding: 8px 14px; border-right: 1px solid var(--surface1); }
+  .window .bar span.on { color: var(--text); background: var(--base); box-shadow: inset 0 2px 0 var(--accent); }
+  pre { margin: 0; padding: 14px 0; font-size: 13px; line-height: 1.7; overflow-x: auto; counter-reset: ln; }
+  pre .l { display: block; padding: 0 16px 0 0; }
+  pre .l::before {
+    counter-increment: ln; content: counter(ln);
+    display: inline-block; width: 3.2em; padding-right: 1.2em; text-align: right; color: var(--overlay);
+  }
+  pre .l.hl { background: var(--surface0); }
+  pre .l.hl::before { color: var(--subtext); }
+  pre .l.add { background: color-mix(in oklch, var(--moss) 12%, var(--base)); }
+  pre .l.del { background: color-mix(in oklch, var(--flare) 12%, var(--base)); }
+  .sel { background: var(--surface2); }
+  .cursor { border-left: 2px solid var(--accent); margin-left: -1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { border-color: transparent; } }
+  .k { color: var(--s-keyword); } .f { color: var(--s-function); } .s { color: var(--s-string); }
+  .n { color: var(--s-number); } .t { color: var(--s-type); } .o { color: var(--s-operator); }
+  .d { color: var(--s-decorator); } .p { color: var(--s-property); } .v { color: var(--text); }
+  .a { color: var(--text2); font-style: italic; } .c { color: var(--s-comment); font-style: italic; }
+  .e { color: var(--flare); } .x { color: var(--subtext); }
+  .kitty {
+    background: var(--base); color: var(--text);
+    border: 1px solid var(--surface1);
+    font: 12.5px/1.35 "JetBrains Mono", ui-monospace, monospace;
+    box-shadow: 0 30px 80px -30px oklch(0 0 0 / .7);
+    display: flex; flex-direction: column;
+  }
+  .kpanes { display: grid; grid-template-columns: 1.25fr 1fr; gap: 1px; background: var(--surface1); }
+  .kpane { background: var(--base); padding: 6px 8px; overflow: hidden; outline: 1px solid transparent; outline-offset: -1px; cursor: text; }
+  .kpane.kactive { outline-color: var(--accent); }
+  .knvim { grid-row: 1 / span 2; padding: 6px 0 0; display: flex; }
+  .knvim pre { display: flex; flex-direction: column; flex: 1; }
+  .knvim .kline { margin-top: auto; }
+  .kitty pre { margin: 0; padding: 0; font: inherit; white-space: pre; overflow: hidden; }
+  .kitty pre .kl { display: block; }
+  .kitty pre .kl::before { content: none; }
+  .kg { display: inline-block; width: 2ch; text-align: center; }
+  .ka { color: var(--a-green); } .km { color: var(--a-yellow); } .kd { color: var(--a-red); }
+  .ke { color: var(--a-red); } .kw { color: var(--a-yellow); }
+  .kn { color: var(--overlay); }
+  .kcur { background: var(--surface0); } .kcn { color: var(--a-yellow); font-weight: 700; }
+  .kblk { background: var(--text); color: var(--base); }
+  .kerr { text-decoration: underline wavy var(--a-red); text-underline-offset: 3px; }
+  .kvt { font-style: italic; padding-left: 2ch; }
+  .kt { color: var(--surface2); padding-left: 1ch; }
+  .kline { display: flex; background: var(--crust); }
+  .kmode { background: var(--accent); color: var(--base); font-weight: 700; }
+  .kb1 { background: var(--surface1); color: var(--text2); }
+  .kb2 { background: var(--surface0); color: var(--subtext); }
+  .kwmod { color: var(--a-yellow); }
+  .kfill { flex: 1; }
+  .kmsg { color: var(--text2); padding: 0 1ch; }
+  .ksb { color: var(--a-cyan); font-weight: 700; } .kmb { color: var(--a-magenta); font-weight: 700; }
+  .krb { color: var(--a-red); font-weight: 700; } .kgb { color: var(--a-green); font-weight: 700; }
+  .kdim { color: var(--a-brightblack); } .kcy { color: var(--a-cyan); } .kmg { color: var(--a-magenta); }
+  .kgr { color: var(--a-green); } .kye { color: var(--a-yellow); } .krd { color: var(--a-red); } .kbl { color: var(--a-blue); }
+  .kul { text-decoration: underline; text-underline-offset: 3px; }
+  .kbadge { background: var(--a-green); color: var(--base); font-weight: 700; }
+  .kcblk { background: var(--accent); }
+  .kpane:not(.kactive) .kcblk { background: none; outline: 1px solid var(--accent); outline-offset: -1px; }
+  .kff { display: inline-grid; grid-template-columns: auto auto; gap: 0 2ch; vertical-align: top; }
+  .klogo { color: var(--accent); font-weight: 700; }
+  .ktabs { display: flex; background: var(--crust); color: var(--subtext); line-height: 1.6; }
+  .ktab { padding: 0 1.8ch 0 1.4ch; clip-path: polygon(0 0, calc(100% - .9ch) 0, 100% 100%, .9ch 100%); margin-right: -.6ch; background: var(--surface0); }
+  .ktab:first-child { clip-path: polygon(0 0, calc(100% - .9ch) 0, 100% 100%, 0 100%); }
+  .ktab.kon { background: var(--accent); color: var(--base); font-weight: 700; }
+  .kclock { padding: 0 1ch; color: var(--overlay); }
+  #kittyConf { width: 100%; height: 260px; background: var(--crust); color: var(--text2); border: 1px solid var(--surface1); padding: 12px; font: 12px/1.6 "JetBrains Mono", monospace; }
+  .status {
+    display: flex; justify-content: space-between; font: 11px "JetBrains Mono", monospace;
+    background: var(--crust); border-top: 1px solid var(--surface1); color: var(--subtext);
+  }
+  .status span { padding: 4px 12px; }
+  .status .mode { background: var(--accent); color: var(--base); font-weight: 600; }
+  .term pre { padding: 14px 16px; }
+  .tdemo .term pre { font-size: 12.5px; line-height: 1.6; white-space: pre; }
+  .tr{color:var(--a-red)} .tg{color:var(--a-green)} .ty{color:var(--a-yellow)} .tbl{color:var(--a-blue)}
+  .tm{color:var(--a-magenta)} .tc{color:var(--a-cyan)} .tbb{color:var(--a-brightblack)}
+  .tbr{color:var(--a-brightred)} .tbg{color:var(--a-brightgreen)} .tbye{color:var(--a-brightyellow)} .tbc{color:var(--a-brightcyan)}
+  .tb{font-weight:700} .tu{text-decoration:underline} .tx{text-decoration:line-through}
+  .tsel{background:var(--surface2)} .tsl{background:var(--surface0);color:var(--text2);display:inline-block;width:100%}
+  .tslm{background:var(--a-cyan);color:var(--base);font-weight:700;padding:0 6px}
+  .tdemo .term pre .tx.tr { text-decoration: underline wavy; }
+  .ansi { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 12px; }
+  .ansi div { height: 28px; }
+  .ui { padding: 20px; display: grid; gap: 16px; background: var(--base); }
+  .ui .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn { padding: 11px 18px; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--surface1); background: var(--base); color: var(--text); }
+  .btn.pri { background: var(--accent); color: var(--base); border-color: var(--accent); }
+  .badge { font: 11px "JetBrains Mono", monospace; padding: 3px 8px; border: 1px solid; }
+  .card { background: var(--mantle); border: 1px solid var(--surface1); padding: 16px; }
+  .card p { margin: 6px 0 0; color: var(--subtext); }
+  .alert { padding: 10px 14px; border-left: 2px solid; font-size: 13px; }
+  .exportbar { display: flex; gap: 8px; margin-bottom: 8px; }
+  .exportbar select { flex: 1; background: var(--crust); color: var(--text); border: 1px solid var(--surface1); font: 12px "JetBrains Mono", monospace; padding: 8px; }
+  .exportbar .btn { padding: 8px 14px; }
+  body.shot header, body.shot main > :not(.shot-keep) { display: none !important; }
+  body.shot { background: var(--crust); }
+  body.shot main { padding: 24px; max-width: none; }
+  body.shot .shot-keep h2 { display: none; }
+  body.shot .kitty { min-height: calc(100vh - 48px); }
+  body.shot .kpanes { flex: 1; }
+  body.shot *, body.shot *::before, body.shot *::after { animation: none !important; transition: none !important; }
+  textarea#export {
+    width: 100%; height: 420px; background: var(--crust); color: var(--text2);
+    border: 1px solid var(--surface1); padding: 12px; font: 12px/1.6 "JetBrains Mono", monospace;
+  }
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: var(--base); padding: 8px 14px; font: 12px "JetBrains Mono", monospace; opacity: 0; transition: opacity .2s; }
+  .toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>Living Code</span> preview</h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="controls">
+    <label>chroma <input id="chroma" type="range" min="0.4" max="1.5" step="0.05" value="1" /><output id="chromaOut">1.00×</output></label>
+    <label>lightness <input id="light" type="range" min="-0.12" max="0.1" step="0.01" value="0" /><output id="lightOut">+0.00</output></label>
+    <label>hue shift <input id="hue" type="range" min="-30" max="30" step="1" value="0" /><output id="hueOut">0°</output></label>
+  </div>
+</header>
+
+<main>
+  <p class="idea" id="idea"></p>
+
+  <section>
+    <h2>Neutrals</h2>
+    <div class="swatches" id="neutrals"></div>
+  </section>
+
+  <section>
+    <h2>Accents · contrast vs base · click to copy</h2>
+    <div class="swatches" id="accents"></div>
+  </section>
+
+  <section class="grid2">
+    <div class="window">
+      <div class="bar"><span class="on">livingCode.ts</span><span>Hero.astro</span><span>global.css</span></div>
+<pre><span class="l"><span class="k">import</span> <span class="o">{</span> <span class="v">gsap</span> <span class="o">}</span> <span class="k">from</span> <span class="s">"gsap"</span><span class="o">;</span></span><span class="l"><span class="k">import type</span> <span class="o">{</span> <span class="t">GlyphField</span> <span class="o">}</span> <span class="k">from</span> <span class="s">"./types"</span><span class="o">;</span></span><span class="l"> </span><span class="l"><span class="c">// Glyph accent color</span></span><span class="l"><span class="k">const</span> <span class="v">ACCENT</span> <span class="o">=</span> <span class="s">"oklch(0.65 0.15 180)"</span><span class="o">;</span></span><span class="l"><span class="k">const</span> <span class="v">MAX_GLYPHS</span> <span class="o">=</span> <span class="n">4_096</span><span class="o">;</span></span><span class="l"> </span><span class="l"><span class="d">@memoize</span></span><span class="l hl"><span class="k">export async function</span> <span class="f">renderField</span><span class="o">(</span><span class="a">field</span><span class="o">:</span> <span class="t">GlyphField</span><span class="o">,</span> <span class="a">paused</span> <span class="o">=</span> <span class="n">false</span><span class="o">):</span> <span class="t">Promise</span><span class="o">&lt;</span><span class="t">void</span><span class="o">&gt;</span> <span class="o">{</span></span><span class="l">  <span class="k">if</span> <span class="o">(!</span><span class="v">field</span><span class="o">.</span><span class="p">gpu</span> <span class="o">||</span> <span class="v">paused</span><span class="o">)</span> <span class="k">return</span> <span class="f">fallback</span><span class="o">(</span><span class="v">field</span><span class="o">);</span></span><span class="l">  <span class="k">const</span> <span class="o">{</span> <span class="p">width</span><span class="o">,</span> <span class="p">height</span> <span class="o">}</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="f">measure</span><span class="o">(</span><span class="o">);</span></span><span class="l">  <span class="k">for</span> <span class="o">(</span><span class="k">let</span> <span class="v">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="v">i</span> <span class="o">&lt;</span> <span class="v">MAX_GLYPHS</span><span class="o">;</span> <span class="v">i</span><span class="o">++)</span> <span class="o">{</span></span><span class="l">    <span class="v">field</span><span class="o">.</span><span class="p">cells</span><span class="o">[</span><span class="v">i</span><span class="o">].</span><span class="p">char</span> <span class="o">=</span> <span class="s">`<span class="o">${</span><span class="v">width</span> <span class="o">*</span> <span class="n">0.5</span><span class="o">}</span>px`</span><span class="o">;</span></span><span class="l">  <span class="o">}</span></span><span class="l">  <span class="k">await</span> <span class="v">gsap</span><span class="o">.</span><span class="f">to</span><span class="o">(</span><span class="v">field</span><span class="o">,</span> <span class="o">{</span> <span class="p">opacity</span><span class="o">:</span> <span class="n">1</span><span class="o">,</span> <span class="p">ease</span><span class="o">:</span> <span class="s">"power3.out"</span> <span class="o">}</span><span class="o">);</span></span><span class="l">  <span class="k">throw new</span> <span class="t">Error</span><span class="o">(</span><span class="s">"unreachable <span class="o">\n</span>"</span><span class="o">)</span><span class="o">;</span> <span class="e">// ✗ never</span></span><span class="l"><span class="o">}</span><span class="cursor"></span></span></pre>
+      <div class="status"><span class="mode">NORMAL</span><span>main · ts · utf-8</span><span>8:24</span></div>
+    </div>
+
+    <div class="window">
+      <div class="bar"><span>livingCode.ts</span><span class="on">Hero.astro</span><span>global.css</span></div>
+<pre><span class="l"><span class="o">---</span></span><span class="l"><span class="k">const</span> <span class="o">{</span> <span class="v">locale</span> <span class="o">}</span> <span class="o">=</span> <span class="v">Astro</span><span class="o">.</span><span class="p">props</span><span class="o">;</span></span><span class="l"><span class="o">---</span></span><span class="l"><span class="o">&lt;</span><span class="d">section</span> <span class="p">class</span><span class="o">=</span><span class="s">"hero"</span> <span class="p">data-locale</span><span class="o">={</span><span class="v">locale</span><span class="o">}&gt;</span></span><span class="l">  <span class="o">&lt;</span><span class="d">h1</span><span class="o">&gt;</span><span class="v">Elliot Luque</span><span class="o">&lt;/</span><span class="d">h1</span><span class="o">&gt;</span></span><span class="l">  <span class="o">&lt;</span><span class="t">GlyphField</span> <span class="p">glyph</span><span class="o">=</span><span class="s">"[el]"</span> <span class="o">/&gt;</span></span><span class="l"><span class="o">&lt;/</span><span class="d">section</span><span class="o">&gt;</span></span><span class="l"> </span><span class="l"><span class="o">&lt;</span><span class="d">style</span><span class="o">&gt;</span></span><span class="l">  <span class="t">.hero</span> <span class="o">{</span></span><span class="l">    <span class="p">background</span><span class="o">:</span> <span class="f">var</span><span class="o">(</span><span class="v">--background</span><span class="o">);</span></span><span class="l">    <span class="p">padding-block</span><span class="o">:</span> <span class="f">clamp</span><span class="o">(</span><span class="n">100px</span><span class="o">,</span> <span class="n">12vw</span><span class="o">,</span> <span class="n">190px</span><span class="o">);</span></span><span class="l">    <span class="p">color</span><span class="o">:</span> <span class="n">#e2e9ee</span><span class="o">;</span> <span class="c">/* fg */</span></span><span class="l">  <span class="o">}</span></span><span class="l"><span class="o">&lt;/</span><span class="d">style</span><span class="o">&gt;</span></span></pre>
+      <div class="status"><span class="mode">INSERT</span><span>main · astro</span><span>5:12</span></div>
+    </div>
+
+    <div class="window">
+      <div class="bar"><span class="on">git diff</span></div>
+<pre><span class="l"><span class="x">@@ -24,7 +24,7 @@</span> <span class="f">export default defineConfig</span></span><span class="l">   <span class="v">integrations</span><span class="o">: [</span></span><span class="l">     <span class="f">expressiveCode</span><span class="o">({</span></span><span class="l del"><span class="e">-</span>      <span class="p">themes</span><span class="o">: [</span><span class="s">"material-theme-ocean"</span><span class="o">],</span></span><span class="l add"><span class="s">+</span>      <span class="p">themes</span><span class="o">: [</span><span class="v">livingCode</span><span class="o">],</span></span><span class="l">       <span class="p">plugins</span><span class="o">: [</span><span class="f">pluginLineNumbers</span><span class="o">()],</span></span><span class="l">     <span class="o">}),</span></span></pre>
+    </div>
+
+    <div class="window term">
+      <div class="bar"><span class="on">ghostty: ~/portfolio</span></div>
+<pre><span style="color:var(--a-cyan)">~/portfolio</span> <span style="color:var(--a-magenta)">on</span> <span style="color:var(--a-green)"> colorscheme</span> <span style="color:var(--a-yellow)">[!2 ?1]</span>
+<span style="color:var(--accent)">❯</span> pnpm build
+<span style="color:var(--a-brightblack)">12:04:31</span> <span style="color:var(--a-cyan)">[build]</span> output: <span style="color:var(--a-blue)">"server"</span>
+<span style="color:var(--a-brightblack)">12:04:33</span> <span style="color:var(--a-green)">✓</span> Completed in <span style="color:var(--a-yellow)">1.84s</span>
+<span style="color:var(--a-brightblack)">12:04:33</span> <span style="color:var(--a-red)">✗</span> <span style="color:var(--a-red)">error</span> Cannot find module <span style="color:var(--a-magenta)">'./types'</span>
+<span style="color:var(--accent)">❯</span> ls
+<span style="color:var(--a-blue)">public</span>  <span style="color:var(--a-blue)">src</span>  <span style="color:var(--a-blue)">tests</span>  astro.config.ts  <span style="color:var(--a-green)">deploy.sh</span>  ELLIOT.jpg</pre>
+      <div style="padding:0 16px 16px"><div class="ansi" id="ansi"></div></div>
+    </div>
+  </section>
+
+  <section class="shot-keep">
+    <h2>kitty · tall layout · 3 windows · click a pane to focus</h2>
+    <div class="kitty" id="kitty">
+      <div class="kpanes">
+        <div class="kpane knvim" data-pane>
+<pre><span class="kl"><span class="kg"> </span><span class="kn">  7 </span><span class="k">import</span> <span class="o">{</span> <span class="v">gsap</span> <span class="o">}</span> <span class="k">from</span> <span class="s">"gsap"</span><span class="o">;</span></span><span class="kl"><span class="kg"> </span><span class="kn">  6 </span><span class="k">import</span> <span class="o">{</span> <span class="v">createProgram</span> <span class="o">}</span> <span class="k">from</span> <span class="s">"./gl"</span><span class="o">;</span></span><span class="kl"><span class="kg ka">│</span><span class="kn">  5 </span><span class="k">import type</span> <span class="o">{</span> <span class="t">GlyphField</span><span class="o">,</span> <span class="t">Pointer</span> <span class="o">}</span> <span class="k">from</span> <span class="s">"./types"</span><span class="o">;</span></span><span class="kl"><span class="kg"> </span><span class="kn">  4 </span></span><span class="kl"><span class="kg"> </span><span class="kn">  3 </span><span class="c">/** Render a glyph field. */</span></span><span class="kl"><span class="kg km">│</span><span class="kn">  2 </span><span class="k">const</span> <span class="v">EASE</span> <span class="o">=</span> <span class="s">"power3.out"</span><span class="o">;</span></span><span class="kl"><span class="kg km">│</span><span class="kn">  1 </span><span class="k">const</span> <span class="v">MAX_GLYPHS</span> <span class="o">=</span> <span class="n">4_096</span><span class="o">;</span></span><span class="kl kcur"><span class="kg"> </span><span class="kn kcn">14  </span><span class="k">const</span> <span class="v">RADIUS</span> <span class="o">=</span> <span class="n">0.<span class="kblk">3</span>5</span><span class="o">;</span></span><span class="kl"><span class="kg"> </span><span class="kn">  1 </span></span><span class="kl"><span class="kg"> </span><span class="kn">  2 </span><span class="k">export function</span> <span class="f">mountField</span><span class="o">(</span><span class="a">el</span><span class="o">:</span> <span class="t">HTMLCanvasElement</span><span class="o">)</span> <span class="o">{</span></span><span class="kl"><span class="kg kd">▁</span><span class="kn">  3 </span>  <span class="k">const</span> <span class="v">gl</span> <span class="o">=</span> <span class="v">el</span><span class="o">.</span><span class="f">getContext</span><span class="o">(</span><span class="s">"webgl2"</span><span class="o">);</span></span><span class="kl"><span class="kg ke">E</span><span class="kn">  4 </span>  <span class="k">const</span> <span class="v">field</span><span class="o">:</span> <span class="t">GlyphField</span> <span class="o">=</span> <span class="f"><span class="kerr">createField</span></span><span class="o">(</span><span class="v">gl</span><span class="o">);</span> <span class="kvt ke">■ Cannot find name 'createField'.</span></span><span class="kl"><span class="kg"> </span><span class="kn">  5 </span>  <span class="k">let</span> <span class="v">pointer</span><span class="o">:</span> <span class="t">Pointer</span> <span class="o">=</span> <span class="o">{</span> <span class="p">x</span><span class="o">:</span> <span class="n">0</span><span class="o">,</span> <span class="p">y</span><span class="o">:</span> <span class="n">0</span> <span class="o">};</span></span><span class="kl"><span class="kg"> </span><span class="kn">  6 </span></span><span class="kl"><span class="kg kw">W</span><span class="kn">  7 </span>  <span class="v">el</span><span class="o">.</span><span class="f">addEventListener</span><span class="o">(</span><span class="s">"pointermove"</span><span class="o">,</span> <span class="o">(</span><span class="a">e</span><span class="o">)</span> <span class="o">=&gt;</span> <span class="o">{</span> <span class="kvt kw">▲ 'pointer' is reassigned</span></span><span class="kl"><span class="kg"> </span><span class="kn">  8 </span>    <span class="v">pointer</span> <span class="o">=</span> <span class="o">{</span> <span class="p">x</span><span class="o">:</span> <span class="v">e</span><span class="o">.</span><span class="p">offsetX</span><span class="o">,</span> <span class="p">y</span><span class="o">:</span> <span class="v">e</span><span class="o">.</span><span class="p">offsetY</span> <span class="o">};</span></span><span class="kl"><span class="kg"> </span><span class="kn">  9 </span>  <span class="o">});</span></span><span class="kl"><span class="kg"> </span><span class="kn"> 10 </span></span><span class="kl"><span class="kg"> </span><span class="kn"> 11 </span>  <span class="k">return</span> <span class="v">gsap</span><span class="o">.</span><span class="p">ticker</span><span class="o">.</span><span class="f">add</span><span class="o">(()</span> <span class="o">=&gt;</span> <span class="o">{</span></span><span class="kl"><span class="kg"> </span><span class="kn"> 12 </span>    <span class="k">if</span> <span class="o">(!</span><span class="v">field</span><span class="o">.</span><span class="p">visible</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span> <span class="c">// paused or offscreen</span></span><span class="kl"><span class="kg"> </span><span class="kn"> 13 </span>    <span class="v">field</span><span class="o">.</span><span class="f">step</span><span class="o">(</span><span class="v">pointer</span><span class="o">,</span> <span class="v">RADIUS</span><span class="o">);</span></span><span class="kl"><span class="kg"> </span><span class="kn"> 14 </span>  <span class="o">});</span></span><span class="kl"><span class="kg"> </span><span class="kn"> 15 </span><span class="o">}</span></span><span class="kl kt">~</span><span class="kl kt">~</span><span class="kl kt">~</span><span class="kline"><span class="kmode"> NORMAL </span><span class="kb1"> ⎇ colorscheme </span><span class="kb2"> livingCode.ts <span class="kwmod">[+]</span></span><span class="kfill"></span><span class="kb2"><span class="ke">■ 1</span> <span class="kw">▲ 1</span>  typescript </span><span class="kb1"> 54% </span><span class="kmode"> 14:7 </span></span><span class="kl kmsg">"src/components/landing/livingCode.ts" 29L, 812B written</span></pre>
+        </div>
+
+        <div class="kpane kactive" data-pane>
+<pre><span class="ksb">~/portfolio</span> on <span class="kmb">⎇ colorscheme</span> <span class="krb">[!2?1]</span> via <span class="kgb">⬢ v22.11.0</span>
+<span class="kgb">❯</span> pnpm dev
+
+<span class="kdim">&gt; portfolio@0.0.1 dev /home/elliot/portfolio</span>
+<span class="kdim">&gt; astro dev</span>
+
+<span class="kdim">21:04:09</span> <span class="kcy">[types]</span> Generated <span class="kdim">118ms</span>
+<span class="kdim">21:04:09</span> <span class="kcy">[content]</span> Synced content
+
+ <span class="kbadge"> astro </span> <span class="kgr">v5.16.12</span> <span class="kdim">ready in</span> 412 <span class="kdim">ms</span>
+
+<span class="kdim">┃</span> Local    <span class="kbl kul">http://localhost:4321/</span>
+<span class="kdim">┃</span> Network  <span class="kdim">use</span> --host <span class="kdim">to expose</span>
+
+<span class="kdim">21:04:12</span> <span class="kcy">[watch]</span> src/styles/global.css
+<span class="kdim">21:04:12</span> <span class="kmg">[vite]</span> <span class="kgr">hmr update</span> <span class="kdim">/src/styles/global.css</span>
+<span class="kdim">21:04:15</span> <span class="kye">[WARN]</span> [router] <span class="kye">/es/blog</span> has no trailing slash
+<span class="kdim">21:04:18</span> <span class="krd">[ERROR]</span> <span class="krd">Cannot find name 'createField'</span>
+  <span class="kdim">╭─[</span><span class="kcy">livingCode.ts</span><span class="kdim">:</span><span class="kye">14</span><span class="kdim">:</span><span class="kye">29</span><span class="kdim">]</span>
+  <span class="kdim">│</span> <span class="krd">^^^^^^^^^^^</span>
+<span class="kcblk"> </span></pre>
+        </div>
+
+        <div class="kpane" data-pane>
+<pre><span class="ksb">~</span>
+<span class="kgb">❯</span> fastfetch
+<span class="kff"><span class="klogo">
+ ████ █████ ██    ████
+ ██   ██    ██      ██
+ ██   ████  ██      ██
+ ██   ██    ██      ██
+ ████ █████ █████ ████
+</span><span><span class="ksb">elliot</span>@<span class="ksb">nixos</span>
+<span class="kdim">────────────</span>
+<span class="ksb">OS</span>     NixOS 25.05
+<span class="ksb">Kernel</span> 6.12.8
+<span class="ksb">WM</span>     Hyprland
+<span class="ksb">Term</span>   kitty 0.39.1
+<span class="ksb">Font</span>   JetBrains Mono
+<span class="ksb">Theme</span>  <span id="kthemeName">living-code</span>
+<span class="ksb">Memory</span> <span class="kgr">9.1</span> / 16 GiB
+
+<span id="kblocks"></span></span></span>
+<span class="ksb">~</span>
+<span class="kgb">❯</span> </pre>
+        </div>
+      </div>
+      <div class="ktabs">
+        <span class="ktab">1 nvim</span><span class="ktab kon">2 dev</span><span class="ktab">3 sys</span><span class="kfill"></span><span class="kclock">tall · 21:04</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Terminal demos</h2>
+    <div class="grid2 tdemo">
+      <div class="window term">
+        <div class="bar"><span class="on">eza -la --git --icons</span></div>
+<pre><span class="tc">❯</span> eza -la --git
+<span class="tbb">Permissions Size User   Date Modified Git Name</span>
+<span class="tbl">d</span><span class="ty">r</span><span class="tr">w</span><span class="tg">x</span>r-xr-x     - <span class="tbye">elliot</span> <span class="tbl">11 oct 21:02</span>  <span class="tg">-N</span> <span class="tbl tb">design</span>
+<span class="tbl">d</span><span class="ty">r</span><span class="tr">w</span><span class="tg">x</span>r-xr-x     - <span class="tbye">elliot</span> <span class="tbl">10 oct 18:44</span>  <span class="ty">-M</span> <span class="tbl tb">src</span>
+.<span class="ty">r</span><span class="tr">w</span>-r--r--  <span class="tbg">1.4k</span> <span class="tbye">elliot</span> <span class="tbl">09 oct 12:10</span>  <span class="tbb">--</span> astro.config.ts
+.<span class="ty">r</span><span class="tr">w</span><span class="tg">x</span>r-xr-x   <span class="tbg">212</span> <span class="tbye">elliot</span> <span class="tbl">02 oct 09:31</span>  <span class="tbb">--</span> <span class="tg tb">deploy.sh</span>
+.<span class="ty">r</span><span class="tr">w</span>-r--r--  <span class="tg">412k</span> <span class="tbye">elliot</span> <span class="tbl">28 sep 16:02</span>  <span class="tbb">--</span> <span class="tm">ELLIOT.jpg</span>
+lrwxrwxrwx     - <span class="tbye">elliot</span> <span class="tbl">28 sep 16:02</span>  <span class="tbb">--</span> <span class="tc">node_modules</span> <span class="tbb">→</span> .pnpm
+.<span class="ty">r</span><span class="tr">w</span>-r--r--  <span class="tbg">8.2k</span> <span class="tbye">elliot</span> <span class="tbl">11 oct 20:58</span>  <span class="tr">-D</span> <span class="tbb tx">PRODUCT.md</span></pre>
+      </div>
+
+      <div class="window term">
+        <div class="bar"><span class="on">git log --graph --oneline</span></div>
+<pre><span class="tc">❯</span> git log --graph --oneline --decorate
+<span class="tr">*</span> <span class="ty">a3f91c2</span> <span class="ty">(</span><span class="tbc tb">HEAD -&gt;</span> <span class="tg tb">colorscheme</span><span class="ty">)</span> feat: add palette viewer
+<span class="tr">*</span> <span class="ty">7be20d4</span> fix: paper variant gamut
+<span class="tr">|</span> <span class="tg">*</span> <span class="ty">e81c0aa</span> <span class="ty">(</span><span class="tr tb">origin/main</span><span class="ty">,</span> <span class="tg tb">main</span><span class="ty">)</span> chore: bump astro
+<span class="tr">|</span> <span class="tg">*</span> <span class="ty">51d9f03</span> feat(signal): durable object room
+<span class="tr">|</span><span class="tg">/</span>
+<span class="tbl">*</span> <span class="ty">0c4e7b1</span> <span class="ty">(</span><span class="tbye tb">tag: v2.0.0</span><span class="ty">)</span> refactor: living code hero
+<span class="tbl">*</span> <span class="ty">9a12f6e</span> docs: document palette roles
+<span class="tbl">*</span> <span class="ty">4d0b8aa</span> init</pre>
+      </div>
+
+      <div class="window term">
+        <div class="bar"><span class="on">btop</span></div>
+<pre><span class="tbb">┌</span><span class="tc tb"> cpu </span><span class="tbb">──────────────────────────── </span><span class="tbye">3.2GHz</span><span class="tbb"> ┐</span>
+<span class="tbb">│</span> C0 <span class="tg">■■■■■■</span><span class="tbb">··············</span>  <span class="tg">28%</span> <span class="tbb">│</span>
+<span class="tbb">│</span> C1 <span class="tg">■■■■■■■■</span><span class="ty">■■■■</span><span class="tbb">········</span>  <span class="ty">61%</span> <span class="tbb">│</span>
+<span class="tbb">│</span> C2 <span class="tg">■■■■■■■■</span><span class="ty">■■■■■</span><span class="tr">■■■■■</span><span class="tbb">··</span>  <span class="tr">93%</span> <span class="tbb">│</span>
+<span class="tbb">│</span> C3 <span class="tg">■■■</span><span class="tbb">·················</span>  <span class="tg">12%</span> <span class="tbb">│</span>
+<span class="tbb">├</span><span class="tm tb"> mem </span><span class="tbb">───────────────────────────────────┤</span>
+<span class="tbb">│</span> used <span class="tm">■■■■■■■■■■■</span><span class="tbb">·········</span> 9.1/16G <span class="tbb">│</span>
+<span class="tbb">├</span><span class="tbl tb"> proc </span><span class="tbb">──────────────────────────────────┤</span>
+<span class="tbb">│</span> <span class="tbb">pid   name          cpu%   mem</span>       <span class="tbb">│</span>
+<span class="tbb">│</span><span class="tsel"> 4412  node (astro)  <span class="ty">38.2</span>   612M      </span><span class="tbb">│</span>
+<span class="tbb">│</span> 2290  workerd       <span class="tg">11.0</span>   188M       <span class="tbb">│</span>
+<span class="tbb">│</span> 1873  ghostty        <span class="tg">4.1</span>    96M       <span class="tbb">│</span>
+<span class="tbb">└────────────────────────────────────────┘</span></pre>
+      </div>
+
+      <div class="window term">
+        <div class="bar"><span class="on">pnpm test</span></div>
+<pre><span class="tc">❯</span> pnpm test
+
+ <span class="tbg tb">✓</span> tests/i18n.test.ts <span class="tbb">(12 tests)</span> <span class="tg">18ms</span>
+ <span class="tbg tb">✓</span> tests/glyphs.test.ts <span class="tbb">(7 tests)</span> <span class="tg">41ms</span>
+ <span class="tr tb">✗</span> tests/signal.test.ts <span class="tbb">(4 tests | </span><span class="tr">1 failed</span><span class="tbb">)</span>
+   <span class="tr">✗</span> SignalRoom &gt; broadcasts to peers
+     <span class="tbr">AssertionError:</span> expected <span class="tg">3</span> to be <span class="tr">2</span>
+     <span class="tbb">❯</span> <span class="tc">src/server/signal.ts</span><span class="tbb">:</span><span class="ty">88</span><span class="tbb">:</span><span class="ty">14</span>
+ <span class="ty tb">↓</span> tests/og.test.ts <span class="tbb">(2 tests | </span><span class="ty">2 skipped</span><span class="tbb">)</span>
+
+ <span class="tbb">Tests</span>  <span class="tr tb">1 failed</span> <span class="tbb">|</span> <span class="tg tb">22 passed</span> <span class="tbb">|</span> <span class="ty">2 skipped</span>
+ <span class="tbb">Time</span>   1.21s</pre>
+      </div>
+
+      <div class="window term">
+        <div class="bar"><span class="on">nvim: diagnostics + fzf</span></div>
+<pre><span class="tbb"> 41 </span>  <span class="tm">const</span> room <span class="tc">=</span> env.<span class="tbl">SIGNAL</span>.<span class="tbl">get</span>(id)<span class="tbb">;</span>   <span class="tr tx">■ 'id' is possibly undefined</span>
+<span class="tbb"> 42 </span>  <span class="tm">await</span> room.<span class="tbl">fetch</span>(req)<span class="tbb">;</span>               <span class="ty">▲ unhandled promise</span>
+<span class="tbb"> 43 </span>  <span class="tbb">// retry backoff</span>                     <span class="tbl">● hint: use retry()</span>
+<span class="tbb">────────────────────────────────────────────────</span>
+<span class="tc">&gt;</span> sig<span class="cursor"></span>                                 <span class="tbb">4/312</span>
+<span class="tsel"><span class="tc">▌</span> src/server/<span class="tc tb">sig</span>nal.ts                      </span>
+  src/styles/<span class="tc tb">sig</span>nal.css
+  tests/<span class="tc tb">sig</span>nal.test.ts
+  src/components/<span class="tc tb">Sig</span>nalRoom.astro
+<span class="tsl"> <span class="tslm">NORMAL</span>  colorscheme  <span class="tr">✗ 1</span> <span class="ty">▲ 1</span>   signal.ts  41:18 </span></pre>
+      </div>
+
+      <div class="window term">
+        <div class="bar"><span class="on">ANSI 16 + man page</span></div>
+<pre><span class="tb">NAME</span>
+       <span class="tb">wrangler</span> - Cloudflare Workers CLI
+<span class="tb">SYNOPSIS</span>
+       <span class="tb">wrangler deploy</span> [<span class="tu tg">--env</span> <span class="tu">name</span>] [<span class="tu tg">--dry-run</span>]
+
+<span class="tbb">     normal  bright   bg</span>
+<span id="ansiTable"></span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>UI components</h2>
+    <div class="window ui">
+      <div class="row">
+        <button class="btn pri">View projects</button>
+        <button class="btn">Contact</button>
+        <span class="badge" style="color:var(--moss)">deployed</span>
+        <span class="badge" style="color:var(--amber)">draft</span>
+        <span class="badge" style="color:var(--flare)">failed</span>
+        <span class="badge" style="color:var(--steel)">info</span>
+        <span class="badge" style="color:var(--orchid)">experimental</span>
+      </div>
+      <div class="card"><b>Signal Room</b><p>Durable Object WebSocket demo.</p></div>
+      <div class="alert" style="border-color:var(--moss);background:color-mix(in oklch,var(--moss) 8%,var(--base))">Build succeeded.</div>
+      <div class="alert" style="border-color:var(--amber);background:color-mix(in oklch,var(--amber) 8%,var(--base))">2 warnings in <code>Hero.astro</code>.</div>
+      <div class="alert" style="border-color:var(--flare);background:color-mix(in oklch,var(--flare) 8%,var(--base))">Deploy failed: missing binding.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Export · palette.json and CSS variables, from the same code as <code>scripts/build.mjs</code> · sliders included</h2>
+    <div class="exportbar"><select id="exportFile"></select><button class="btn" id="download">download</button><button class="btn" id="copy">copy</button></div>
+    <textarea id="export" readonly></textarea>
+  </section>
+</main>
+<div class="toast" id="toast">copied</div>
+
+<script type="module" src="./preview.mjs"></script>
+</body>
+</html>

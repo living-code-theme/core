@@ -1,0 +1,1066 @@
+{
+  "night": {
+    "name": "Living Code Night",
+    "light": false,
+    "colors": {
+      "crust": {
+        "hex": "#020405",
+        "oklch": "oklch(0.1 0.01 240)",
+        "rgb": [
+          2,
+          4,
+          5
+        ]
+      },
+      "base": {
+        "hex": "#05080b",
+        "oklch": "oklch(0.13 0.01 240)",
+        "rgb": [
+          5,
+          8,
+          11
+        ]
+      },
+      "mantle": {
+        "hex": "#090e11",
+        "oklch": "oklch(0.16 0.01 240)",
+        "rgb": [
+          9,
+          14,
+          17
+        ]
+      },
+      "surface0": {
+        "hex": "#12171a",
+        "oklch": "oklch(0.2 0.01 240)",
+        "rgb": [
+          18,
+          23,
+          26
+        ]
+      },
+      "surface1": {
+        "hex": "#1d2226",
+        "oklch": "oklch(0.25 0.01 240)",
+        "rgb": [
+          29,
+          34,
+          38
+        ]
+      },
+      "surface2": {
+        "hex": "#2d3438",
+        "oklch": "oklch(0.32 0.012 240)",
+        "rgb": [
+          45,
+          52,
+          56
+        ]
+      },
+      "overlay": {
+        "hex": "#50565b",
+        "oklch": "oklch(0.45 0.012 240)",
+        "rgb": [
+          80,
+          86,
+          91
+        ]
+      },
+      "comment": {
+        "hex": "#747c80",
+        "oklch": "oklch(0.58 0.012 235)",
+        "rgb": [
+          116,
+          124,
+          128
+        ]
+      },
+      "subtext": {
+        "hex": "#9ba0a2",
+        "oklch": "oklch(0.7023 0.0065 223.49)",
+        "rgb": [
+          155,
+          160,
+          162
+        ]
+      },
+      "text2": {
+        "hex": "#c8cfd4",
+        "oklch": "oklch(0.85 0.01 240)",
+        "rgb": [
+          200,
+          207,
+          212
+        ]
+      },
+      "text": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "teal": {
+        "hex": "#00a692",
+        "oklch": "oklch(0.65 0.15 180)",
+        "rgb": [
+          0,
+          166,
+          146
+        ]
+      },
+      "mint": {
+        "hex": "#52d7c1",
+        "oklch": "oklch(0.8 0.12 180)",
+        "rgb": [
+          82,
+          215,
+          193
+        ]
+      },
+      "aqua": {
+        "hex": "#9ae0dd",
+        "oklch": "oklch(0.86 0.07 192)",
+        "rgb": [
+          154,
+          224,
+          221
+        ]
+      },
+      "steel": {
+        "hex": "#80b6d3",
+        "oklch": "oklch(0.75 0.07 232)",
+        "rgb": [
+          128,
+          182,
+          211
+        ]
+      },
+      "amber": {
+        "hex": "#f0be6d",
+        "oklch": "oklch(0.83 0.115 78)",
+        "rgb": [
+          240,
+          190,
+          109
+        ]
+      },
+      "copper": {
+        "hex": "#e18c5f",
+        "oklch": "oklch(0.72 0.12 48)",
+        "rgb": [
+          225,
+          140,
+          95
+        ]
+      },
+      "flare": {
+        "hex": "#e96560",
+        "oklch": "oklch(0.67 0.165 25)",
+        "rgb": [
+          233,
+          101,
+          96
+        ]
+      },
+      "moss": {
+        "hex": "#8acb83",
+        "oklch": "oklch(0.78 0.12 142)",
+        "rgb": [
+          138,
+          203,
+          131
+        ]
+      },
+      "orchid": {
+        "hex": "#bf91cd",
+        "oklch": "oklch(0.72 0.1 318)",
+        "rgb": [
+          191,
+          145,
+          205
+        ]
+      },
+      "rose": {
+        "hex": "#ddaec3",
+        "oklch": "oklch(0.8 0.06 350)",
+        "rgb": [
+          221,
+          174,
+          195
+        ]
+      }
+    },
+    "roles": {
+      "bg": "base",
+      "bgAlt": "mantle",
+      "bgDeep": "crust",
+      "fg": "text",
+      "fgAlt": "text2",
+      "fgMuted": "subtext",
+      "fgSubtle": "comment",
+      "accent": "teal",
+      "cursor": "teal",
+      "selection": "surface2",
+      "lineHighlight": "surface0",
+      "border": "surface1",
+      "borderActive": "teal",
+      "lineNumber": "overlay",
+      "lineNumberActive": "amber",
+      "match": "amber",
+      "error": "flare",
+      "warning": "amber",
+      "info": "steel",
+      "hint": "mint",
+      "success": "moss",
+      "added": "moss",
+      "removed": "flare",
+      "modified": "amber",
+      "keyword": "mint",
+      "builtin": "mint",
+      "function": "aqua",
+      "string": "moss",
+      "number": "copper",
+      "constant": "copper",
+      "escape": "copper",
+      "regex": "orchid",
+      "type": "steel",
+      "namespace": "steel",
+      "operator": "comment",
+      "punctuation": "overlay",
+      "decorator": "orchid",
+      "tag": "orchid",
+      "attribute": "text2",
+      "property": "text2",
+      "variable": "text",
+      "parameter": "text2",
+      "comment": "comment",
+      "heading": "teal",
+      "link": "aqua",
+      "code": "amber",
+      "quote": "comment"
+    },
+    "ansi": {
+      "normal": [
+        "#1d2226",
+        "#e96560",
+        "#8acb83",
+        "#f0be6d",
+        "#80b6d3",
+        "#bf91cd",
+        "#00a692",
+        "#9ba0a2"
+      ],
+      "bright": [
+        "#50565b",
+        "#fa8880",
+        "#abe2a4",
+        "#ffdba5",
+        "#a1cfe8",
+        "#d5ade2",
+        "#1fc1ab",
+        "#e2e9ee"
+      ]
+    }
+  },
+  "frost": {
+    "name": "Living Code Frost",
+    "light": false,
+    "colors": {
+      "crust": {
+        "hex": "#050a0f",
+        "oklch": "oklch(0.14 0.015 245)",
+        "rgb": [
+          5,
+          10,
+          15
+        ]
+      },
+      "base": {
+        "hex": "#0a1016",
+        "oklch": "oklch(0.17 0.015 245)",
+        "rgb": [
+          10,
+          16,
+          22
+        ]
+      },
+      "mantle": {
+        "hex": "#10171c",
+        "oklch": "oklch(0.2 0.015 245)",
+        "rgb": [
+          16,
+          23,
+          28
+        ]
+      },
+      "surface0": {
+        "hex": "#171e24",
+        "oklch": "oklch(0.23 0.015 245)",
+        "rgb": [
+          23,
+          30,
+          36
+        ]
+      },
+      "surface1": {
+        "hex": "#232a30",
+        "oklch": "oklch(0.28 0.015 245)",
+        "rgb": [
+          35,
+          42,
+          48
+        ]
+      },
+      "surface2": {
+        "hex": "#333c43",
+        "oklch": "oklch(0.35 0.018 245)",
+        "rgb": [
+          51,
+          60,
+          67
+        ]
+      },
+      "overlay": {
+        "hex": "#50565b",
+        "oklch": "oklch(0.45 0.012 240)",
+        "rgb": [
+          80,
+          86,
+          91
+        ]
+      },
+      "comment": {
+        "hex": "#7d8489",
+        "oklch": "oklch(0.61 0.012 235)",
+        "rgb": [
+          125,
+          132,
+          137
+        ]
+      },
+      "subtext": {
+        "hex": "#9ba0a2",
+        "oklch": "oklch(0.7023 0.0065 223.49)",
+        "rgb": [
+          155,
+          160,
+          162
+        ]
+      },
+      "text2": {
+        "hex": "#c8cfd4",
+        "oklch": "oklch(0.85 0.01 240)",
+        "rgb": [
+          200,
+          207,
+          212
+        ]
+      },
+      "text": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "teal": {
+        "hex": "#43a997",
+        "oklch": "oklch(0.67 0.0975 180)",
+        "rgb": [
+          67,
+          169,
+          151
+        ]
+      },
+      "mint": {
+        "hex": "#8ad5c6",
+        "oklch": "oklch(0.82 0.078 180)",
+        "rgb": [
+          138,
+          213,
+          198
+        ]
+      },
+      "aqua": {
+        "hex": "#b6e2df",
+        "oklch": "oklch(0.88 0.0455 192)",
+        "rgb": [
+          182,
+          226,
+          223
+        ]
+      },
+      "steel": {
+        "hex": "#98bacd",
+        "oklch": "oklch(0.77 0.0455 232)",
+        "rgb": [
+          152,
+          186,
+          205
+        ]
+      },
+      "amber": {
+        "hex": "#e9c897",
+        "oklch": "oklch(0.85 0.0748 78)",
+        "rgb": [
+          233,
+          200,
+          151
+        ]
+      },
+      "copper": {
+        "hex": "#d49c80",
+        "oklch": "oklch(0.74 0.078 48)",
+        "rgb": [
+          212,
+          156,
+          128
+        ]
+      },
+      "flare": {
+        "hex": "#d68079",
+        "oklch": "oklch(0.69 0.1073 25)",
+        "rgb": [
+          214,
+          128,
+          121
+        ]
+      },
+      "moss": {
+        "hex": "#a2cb9d",
+        "oklch": "oklch(0.8 0.078 142)",
+        "rgb": [
+          162,
+          203,
+          157
+        ]
+      },
+      "orchid": {
+        "hex": "#bc9ec6",
+        "oklch": "oklch(0.74 0.065 318)",
+        "rgb": [
+          188,
+          158,
+          198
+        ]
+      },
+      "rose": {
+        "hex": "#d9bac8",
+        "oklch": "oklch(0.82 0.039 350)",
+        "rgb": [
+          217,
+          186,
+          200
+        ]
+      }
+    },
+    "roles": {
+      "bg": "base",
+      "bgAlt": "mantle",
+      "bgDeep": "crust",
+      "fg": "text",
+      "fgAlt": "text2",
+      "fgMuted": "subtext",
+      "fgSubtle": "comment",
+      "accent": "teal",
+      "cursor": "teal",
+      "selection": "surface2",
+      "lineHighlight": "surface0",
+      "border": "surface1",
+      "borderActive": "teal",
+      "lineNumber": "overlay",
+      "lineNumberActive": "amber",
+      "match": "amber",
+      "error": "flare",
+      "warning": "amber",
+      "info": "steel",
+      "hint": "mint",
+      "success": "moss",
+      "added": "moss",
+      "removed": "flare",
+      "modified": "amber",
+      "keyword": "mint",
+      "builtin": "mint",
+      "function": "aqua",
+      "string": "moss",
+      "number": "copper",
+      "constant": "copper",
+      "escape": "copper",
+      "regex": "orchid",
+      "type": "steel",
+      "namespace": "steel",
+      "operator": "comment",
+      "punctuation": "overlay",
+      "decorator": "orchid",
+      "tag": "orchid",
+      "attribute": "text2",
+      "property": "text2",
+      "variable": "text",
+      "parameter": "text2",
+      "comment": "comment",
+      "heading": "teal",
+      "link": "aqua",
+      "code": "amber",
+      "quote": "comment"
+    },
+    "ansi": {
+      "normal": [
+        "#232a30",
+        "#d68079",
+        "#a2cb9d",
+        "#e9c897",
+        "#98bacd",
+        "#bc9ec6",
+        "#43a997",
+        "#9ba0a2"
+      ],
+      "bright": [
+        "#50565b",
+        "#e99e97",
+        "#bfe3bb",
+        "#fce0b6",
+        "#b6d3e3",
+        "#d4b9dc",
+        "#6fbfb0",
+        "#e2e9ee"
+      ]
+    }
+  },
+  "paper": {
+    "name": "Living Code Paper",
+    "light": true,
+    "colors": {
+      "crust": {
+        "hex": "#e0e5e9",
+        "oklch": "oklch(0.92 0.008 240)",
+        "rgb": [
+          224,
+          229,
+          233
+        ]
+      },
+      "base": {
+        "hex": "#f4f7f9",
+        "oklch": "oklch(0.975 0.004 240)",
+        "rgb": [
+          244,
+          247,
+          249
+        ]
+      },
+      "mantle": {
+        "hex": "#ebeff2",
+        "oklch": "oklch(0.95 0.006 240)",
+        "rgb": [
+          235,
+          239,
+          242
+        ]
+      },
+      "surface0": {
+        "hex": "#e3e9ed",
+        "oklch": "oklch(0.93 0.008 240)",
+        "rgb": [
+          227,
+          233,
+          237
+        ]
+      },
+      "surface1": {
+        "hex": "#d2d8dd",
+        "oklch": "oklch(0.88 0.01 240)",
+        "rgb": [
+          210,
+          216,
+          221
+        ]
+      },
+      "surface2": {
+        "hex": "#c2ccd3",
+        "oklch": "oklch(0.84 0.015 240)",
+        "rgb": [
+          194,
+          204,
+          211
+        ]
+      },
+      "overlay": {
+        "hex": "#92999f",
+        "oklch": "oklch(0.68 0.012 240)",
+        "rgb": [
+          146,
+          153,
+          159
+        ]
+      },
+      "comment": {
+        "hex": "#6b7378",
+        "oklch": "oklch(0.55 0.012 235)",
+        "rgb": [
+          107,
+          115,
+          120
+        ]
+      },
+      "subtext": {
+        "hex": "#50565a",
+        "oklch": "oklch(0.45 0.01 240)",
+        "rgb": [
+          80,
+          86,
+          90
+        ]
+      },
+      "text2": {
+        "hex": "#2e3437",
+        "oklch": "oklch(0.32 0.01 240)",
+        "rgb": [
+          46,
+          52,
+          55
+        ]
+      },
+      "text": {
+        "hex": "#12171a",
+        "oklch": "oklch(0.2 0.01 240)",
+        "rgb": [
+          18,
+          23,
+          26
+        ]
+      },
+      "teal": {
+        "hex": "#187d6e",
+        "oklch": "oklch(0.53 0.09 180)",
+        "rgb": [
+          24,
+          125,
+          110
+        ]
+      },
+      "mint": {
+        "hex": "#0f695e",
+        "oklch": "oklch(0.47 0.08 182)",
+        "rgb": [
+          15,
+          105,
+          94
+        ]
+      },
+      "aqua": {
+        "hex": "#1f7074",
+        "oklch": "oklch(0.5 0.075 200)",
+        "rgb": [
+          31,
+          112,
+          116
+        ]
+      },
+      "steel": {
+        "hex": "#2b6991",
+        "oklch": "oklch(0.5 0.09 240)",
+        "rgb": [
+          43,
+          105,
+          145
+        ]
+      },
+      "amber": {
+        "hex": "#8f6213",
+        "oklch": "oklch(0.53 0.105 75)",
+        "rgb": [
+          143,
+          98,
+          19
+        ]
+      },
+      "copper": {
+        "hex": "#a04f27",
+        "oklch": "oklch(0.52 0.12 45)",
+        "rgb": [
+          160,
+          79,
+          39
+        ]
+      },
+      "flare": {
+        "hex": "#a74541",
+        "oklch": "oklch(0.52 0.13 25)",
+        "rgb": [
+          167,
+          69,
+          65
+        ]
+      },
+      "moss": {
+        "hex": "#3b7a35",
+        "oklch": "oklch(0.52 0.12 142)",
+        "rgb": [
+          59,
+          122,
+          53
+        ]
+      },
+      "orchid": {
+        "hex": "#81558e",
+        "oklch": "oklch(0.52 0.1 318)",
+        "rgb": [
+          129,
+          85,
+          142
+        ]
+      },
+      "rose": {
+        "hex": "#845b6e",
+        "oklch": "oklch(0.52 0.06 350)",
+        "rgb": [
+          132,
+          91,
+          110
+        ]
+      }
+    },
+    "roles": {
+      "bg": "base",
+      "bgAlt": "mantle",
+      "bgDeep": "crust",
+      "fg": "text",
+      "fgAlt": "text2",
+      "fgMuted": "subtext",
+      "fgSubtle": "comment",
+      "accent": "teal",
+      "cursor": "teal",
+      "selection": "surface2",
+      "lineHighlight": "surface0",
+      "border": "surface1",
+      "borderActive": "teal",
+      "lineNumber": "overlay",
+      "lineNumberActive": "amber",
+      "match": "amber",
+      "error": "flare",
+      "warning": "amber",
+      "info": "steel",
+      "hint": "mint",
+      "success": "moss",
+      "added": "moss",
+      "removed": "flare",
+      "modified": "amber",
+      "keyword": "mint",
+      "builtin": "mint",
+      "function": "aqua",
+      "string": "moss",
+      "number": "copper",
+      "constant": "copper",
+      "escape": "copper",
+      "regex": "orchid",
+      "type": "steel",
+      "namespace": "steel",
+      "operator": "comment",
+      "punctuation": "overlay",
+      "decorator": "orchid",
+      "tag": "orchid",
+      "attribute": "text2",
+      "property": "text2",
+      "variable": "text",
+      "parameter": "text2",
+      "comment": "comment",
+      "heading": "teal",
+      "link": "aqua",
+      "code": "amber",
+      "quote": "comment"
+    },
+    "ansi": {
+      "normal": [
+        "#d2d8dd",
+        "#a74541",
+        "#3b7a35",
+        "#8f6213",
+        "#2b6991",
+        "#81558e",
+        "#187d6e",
+        "#50565a"
+      ],
+      "bright": [
+        "#92999f",
+        "#853532",
+        "#2d6029",
+        "#724d0d",
+        "#1f5272",
+        "#664371",
+        "#116357",
+        "#12171a"
+      ]
+    }
+  },
+  "signal": {
+    "name": "Living Code Signal",
+    "light": false,
+    "colors": {
+      "crust": {
+        "hex": "#020405",
+        "oklch": "oklch(0.1 0.01 240)",
+        "rgb": [
+          2,
+          4,
+          5
+        ]
+      },
+      "base": {
+        "hex": "#05080b",
+        "oklch": "oklch(0.13 0.01 240)",
+        "rgb": [
+          5,
+          8,
+          11
+        ]
+      },
+      "mantle": {
+        "hex": "#090e11",
+        "oklch": "oklch(0.16 0.01 240)",
+        "rgb": [
+          9,
+          14,
+          17
+        ]
+      },
+      "surface0": {
+        "hex": "#12171a",
+        "oklch": "oklch(0.2 0.01 240)",
+        "rgb": [
+          18,
+          23,
+          26
+        ]
+      },
+      "surface1": {
+        "hex": "#1d2226",
+        "oklch": "oklch(0.25 0.01 240)",
+        "rgb": [
+          29,
+          34,
+          38
+        ]
+      },
+      "surface2": {
+        "hex": "#2d3438",
+        "oklch": "oklch(0.32 0.012 240)",
+        "rgb": [
+          45,
+          52,
+          56
+        ]
+      },
+      "overlay": {
+        "hex": "#50565b",
+        "oklch": "oklch(0.45 0.012 240)",
+        "rgb": [
+          80,
+          86,
+          91
+        ]
+      },
+      "comment": {
+        "hex": "#747c80",
+        "oklch": "oklch(0.58 0.012 235)",
+        "rgb": [
+          116,
+          124,
+          128
+        ]
+      },
+      "subtext": {
+        "hex": "#9ba0a2",
+        "oklch": "oklch(0.7023 0.0065 223.49)",
+        "rgb": [
+          155,
+          160,
+          162
+        ]
+      },
+      "text2": {
+        "hex": "#c8cfd4",
+        "oklch": "oklch(0.85 0.01 240)",
+        "rgb": [
+          200,
+          207,
+          212
+        ]
+      },
+      "text": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "teal": {
+        "hex": "#00a692",
+        "oklch": "oklch(0.65 0.15 180)",
+        "rgb": [
+          0,
+          166,
+          146
+        ]
+      },
+      "mint": {
+        "hex": "#00a692",
+        "oklch": "oklch(0.65 0.15 180)",
+        "rgb": [
+          0,
+          166,
+          146
+        ]
+      },
+      "aqua": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "steel": {
+        "hex": "#c8cfd4",
+        "oklch": "oklch(0.85 0.01 240)",
+        "rgb": [
+          200,
+          207,
+          212
+        ]
+      },
+      "amber": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "copper": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "flare": {
+        "hex": "#e2e9ee",
+        "oklch": "oklch(0.93 0.01 240)",
+        "rgb": [
+          226,
+          233,
+          238
+        ]
+      },
+      "moss": {
+        "hex": "#c8cfd4",
+        "oklch": "oklch(0.85 0.01 240)",
+        "rgb": [
+          200,
+          207,
+          212
+        ]
+      },
+      "orchid": {
+        "hex": "#00a692",
+        "oklch": "oklch(0.65 0.15 180)",
+        "rgb": [
+          0,
+          166,
+          146
+        ]
+      },
+      "rose": {
+        "hex": "#c8cfd4",
+        "oklch": "oklch(0.85 0.01 240)",
+        "rgb": [
+          200,
+          207,
+          212
+        ]
+      }
+    },
+    "roles": {
+      "bg": "base",
+      "bgAlt": "mantle",
+      "bgDeep": "crust",
+      "fg": "text",
+      "fgAlt": "text2",
+      "fgMuted": "subtext",
+      "fgSubtle": "comment",
+      "accent": "teal",
+      "cursor": "teal",
+      "selection": "surface2",
+      "lineHighlight": "surface0",
+      "border": "surface1",
+      "borderActive": "teal",
+      "lineNumber": "overlay",
+      "lineNumberActive": "text2",
+      "match": "teal",
+      "error": "text",
+      "warning": "text2",
+      "info": "text2",
+      "hint": "text2",
+      "success": "text2",
+      "added": "text2",
+      "removed": "text",
+      "modified": "teal",
+      "keyword": "teal",
+      "builtin": "teal",
+      "function": "text",
+      "string": "text",
+      "number": "text",
+      "constant": "text",
+      "escape": "text",
+      "regex": "text",
+      "type": "text2",
+      "namespace": "text2",
+      "operator": "comment",
+      "punctuation": "overlay",
+      "decorator": "teal",
+      "tag": "teal",
+      "attribute": "text2",
+      "property": "text2",
+      "variable": "text",
+      "parameter": "text2",
+      "comment": "comment",
+      "heading": "teal",
+      "link": "teal",
+      "code": "text",
+      "quote": "comment"
+    },
+    "ansi": {
+      "normal": [
+        "#1d2226",
+        "#e2e9ee",
+        "#c8cfd4",
+        "#e2e9ee",
+        "#c8cfd4",
+        "#c8cfd4",
+        "#00a692",
+        "#9ba0a2"
+      ],
+      "bright": [
+        "#50565b",
+        "#e2e9ee",
+        "#e2e9ee",
+        "#e2e9ee",
+        "#e2e9ee",
+        "#e2e9ee",
+        "#00a692",
+        "#e2e9ee"
+      ]
+    }
+  }
+}

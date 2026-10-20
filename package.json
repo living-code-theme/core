@@ -1,0 +1,22 @@
+{
+  "name": "living-code-core",
+  "private": true,
+  "version": "0.1.1",
+  "description": "Living Code's palette, color math, semantic roles, brand and shared tooling.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Living Code",
+  "repository": { "type": "git", "url": "git+https://github.com/living-code-theme/core.git" },
+  "homepage": "https://living-code.dev",
+  "packageManager": "pnpm@12.9.0",
+  "engines": { "node": ">=22.22" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "test": "node --test test/*.test.mjs",
+    "preview": "node scripts/serve.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
+    "icons:brand": "node scripts/brand-icons.mjs",
+    "recolor": "node scripts/recolor.mjs"
+  }
+}

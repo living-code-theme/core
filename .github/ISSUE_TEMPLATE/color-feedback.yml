@@ -1,0 +1,34 @@
+name: Palette or color feedback
+description: A color, contrast or semantic-role problem that affects every app.
+title: "[Color]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the problem only shows up in one app, report it in that app's repository instead: find it on [living-code.dev/ports](https://living-code.dev/ports/).
+  - type: dropdown
+    id: flavor
+    attributes:
+      label: Flavor
+      multiple: true
+      options:
+        - Night
+        - Frost
+        - Paper
+        - Signal
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What would you change, and why?
+      description: Name the color or role if you know it (for example `comment` or `warning`). See the palette tables in the README.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: A real screenshot showing the problem. Drag the image here.
+    validations:
+      required: false
