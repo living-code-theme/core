@@ -54,6 +54,22 @@ linear over the finished candidate set, not repeated serialization of every grow
 
 ## Asset storage and history
 
+### What R2 gives this project
+
+Capture bytes are much larger than guide/index data. The 400-port calibration fixture retains about 100 MiB of
+captures versus about 4 MiB of publication JSON. Frequently replacing those images in Git accumulates old binary
+versions even after current-checkout pruning. R2 moves the derived WebP capture cache to public object storage,
+so future screenshot churn does not keep enlarging landing's clone/history and deployment assets.
+
+Source screenshots still belong in their port repositories. R2 does not change README ownership, generate themes,
+coordinate palette adoption, make GitHub discovery instantaneous or store private credentials in the website.
+Builds still use committed metadata and do not download the external images; visitors load their immutable URLs.
+It adds an external image-delivery dependency, bucket permissions, storage/request billing and retention duties.
+For a small/stable catalog, local/Git storage is simpler. R2 remains explicit opt-in; enabling it does not erase
+historical Git blobs or automatically create infrastructure.
+
+### Choose and configure storage
+
 The default remains checked-in `public/port-images`. Live captures are content-addressed and pruned after the index
 commits, but **Git still retains deleted image blobs**. A growing, frequently changing capture catalog should use
 external storage instead of accumulating every screenshot generation in website history.

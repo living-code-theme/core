@@ -11,22 +11,28 @@ run maintainer tooling or import core during a build.
 
 ## Add a port
 
+See [Creating and contributing a port](PORT-AUTHORING.md) for the complete contributor workflow, generator/palette
+harness responsibilities, local verification and organization review. Contributors without organization access can
+propose a prototype through the core port-request form. The short version:
+
 1. Scaffold the documentation and metadata in an empty directory, from this core checkout:
 
    ```sh
-   pnpm new:port ../kitty --name "Kitty" --group "Terminals" --emoji "🐈"
+   pnpm new:port ../my-app --name "My App" --group "Editors" --emoji "📝"
    # Optional: --slug existing-route --flavors night,paper --no-images
    ```
 
    It creates a README from the shared template, `port.json` referencing the hosted schema, the MIT license and an
-   empty `images/` directory. It refuses non-empty directories. It does not write the theme itself.
-2. Add the theme files. Take every color from a semantic role in [`palette.json`](../palette.json), never from a
-   hand-picked hex value, so the same kind of token gets the same color in every app.
+   empty `images/` directory. It refuses non-empty directories. It does not write the theme, initialize Git, or create
+   the palette pin, generator, package, tests or maintenance harness; those must be supplied/reviewed by the port.
+2. Add the theme files and port-owned maintainer tooling. Take every color from a semantic role in
+   [`palette.json`](../palette.json), never from a hand-picked hex value, so the same kind of token gets the same
+   color in every app.
 3. Add real screenshots of the application (never mockups) and fill in every README placeholder.
 4. Preview it on the website without publishing, from this core checkout. Pass an existing landing checkout explicitly:
 
    ```sh
-   pnpm preview:port ../kitty --landing ../landing
+   pnpm preview:port ../my-app --landing ../landing
    # Optional: --port 4412
    ```
 
@@ -34,7 +40,8 @@ run maintainer tooling or import core during a build.
    or edit the production catalog. The page is marked as a local preview; source links use a local fingerprint,
    not a published commit. Re-run after editing the port.
 
-5. Create the repository in the organization and push its default branch. The next discovery lists it.
+5. Review the implementation and metadata. A maintainer creates/uses the public organization repository and pushes
+   its accepted default branch. The next discovery lists it; app-store/registry releases remain separate.
 
 Repository layout:
 
@@ -177,7 +184,8 @@ sibling repository or runs during a normal Astro build.
 
 ## After a palette change
 
-The core never writes into port repositories. Each port owns `src/generate.mjs`, its application vocabulary,
+Ordinary core builds never update a port. The explicit batch orchestrator delegates to port-owned commands;
+it does not own or compile any application format. Each port owns `src/generate.mjs`, its application vocabulary,
 `test/` contracts/fixtures and its `scripts/generated.json` allowlist. Core owns only the app-agnostic palette/math
 and the resolved export at `exports/ports/palette.json`.
 
@@ -197,3 +205,14 @@ and the resolved export at `exports/ports/palette.json`.
 Changes to port mappings or this port's format belong in that repository even when its palette pin stays unchanged.
 `pnpm check` and packaging refuse stale generated payloads; they never regenerate during installation or publishing.
 See each port's `CONTRIBUTING.md` for its maintenance commands and any fixture-refresh tools.
+
+For multiple ports, use the opt-in [batch palette rollout](PALETTE-ROLLOUTS.md):
+
+```sh
+pnpm palette:update:ports --ports-root ..          # read-only plan
+pnpm palette:update:ports --ports-root .. --apply  # clean checkouts only; no commits/pushes
+```
+
+The entire selection is preflighted before any update. Existing dirty work blocks apply, and runtime failures keep
+reviewable partial diffs rather than resetting them. See the rollout guide for selection, locks, cancellation,
+math migrations, JSON results, screenshot review and updating the website's own palette.

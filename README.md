@@ -301,7 +301,9 @@ Output defaults to `<image>-<flavor>-<mode>.png` next to the input. Run with `--
 ## Contributing a port
 
 Each port is its own repository in [living-code-theme](https://github.com/living-code-theme) with a root `port.json`
-and a README following the shared template; the website discovers it automatically. See [Port repositories](docs/PORTS.md).
+and a README following the shared template; the website discovers it automatically.
+Start with [Creating and contributing a port](docs/PORT-AUTHORING.md), the
+[metadata/README contract](docs/PORTS.md), or [CONTRIBUTING.md](CONTRIBUTING.md) to find the right repository.
 
 Map roles, never colors: take every color from a semantic role in [`palette.json`](palette.json), so the same kind of
 token gets the same color in every app.
@@ -319,7 +321,8 @@ Palette generation uses only Node built-ins; port tooling dependencies are devel
 | `pnpm preview` | Live palette preview with sliders and exports at <http://localhost:4173/preview/>. |
 | `pnpm screenshots` | Recaptures `assets/preview-*.png` from the preview with headless Chrome (`CHROME_BIN` overrides `google-chrome`). |
 | `pnpm icons:brand` | Rasterizes the brand SVGs to PNG and ICO. See [`assets/brand`](assets/brand/README.md). |
-| `pnpm new:port <directory> --name "App" --group "Editors" --emoji "📝"` | Scaffolds a port's README, metadata and license. |
+| `pnpm new:port <directory> --name "App" --group "Editors" --emoji "📝"` | Scaffolds a port's README, metadata and license, not its implementation or maintenance harness. |
+| `pnpm palette:update:ports --ports-root <directory>` | Plans a local palette rollout. Explicit `--apply` invokes each clean port's own updater, build, check and tests; never commits or pushes. |
 | `pnpm sync:ports --landing <checkout>` | Discovers public ports and writes validated snapshots/captures to the website. Supports `--dry-run`, `--refresh` and optional `--r2` storage. |
 | `pnpm preview:port <directory> --landing <checkout>` | Validates a local port and previews it in an isolated website copy. |
 | `pnpm export:landing --landing <checkout>` | Delivers the generated theme JSON, CSS and hosted port schema to the website. Run `pnpm build` first. |
@@ -332,6 +335,8 @@ A palette change does not touch any port: each port repository owns its generato
 Core exports app-agnostic resolved inputs in [`exports/ports/palette.json`](exports/ports/palette.json). A port explicitly
 adopts a committed core revision with `pnpm palette:update /path/to/core`, then regenerates and reviews its own files.
 Normal port builds use the checked-in pin and never read a sibling checkout or fetch from GitHub.
+For an explicitly reviewed multi-port update, use the [batch palette rollout](docs/PALETTE-ROLLOUTS.md), which delegates
+to port-owned commands instead of generating application formats in core.
 The website takes committed inputs from [`exports/landing/`](exports/landing). After `pnpm build`, run
 `pnpm export:landing --landing <checkout>` and review the changes there. Port discovery, validation, templates and
 preview/verification runners live here in core; landing contains Astro and website presentation only. No normal
