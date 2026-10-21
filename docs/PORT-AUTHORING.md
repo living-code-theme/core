@@ -127,7 +127,7 @@ Submit the implementation, pin, generator, tests, documentation and captures for
 create/use `living-code-theme/<repository-name>` and publish the accepted default branch, normally `main`.
 No central website registration, cross-repository token or per-port discovery workflow is required.
 
-Landing polls the public organization approximately every 15 minutes, validates one immutable revision per port,
+Landing polls the public organization once daily at 00:07 UTC, validates one immutable revision per port,
 builds/tests its candidate publication and deploys it. An invalid new port is skipped with a diagnostic. An invalid
 update keeps the port's last accepted website version. Manual dispatch of landing's `sync-ports` workflow can give
 quicker maintainer feedback; normal local website builds do not refresh GitHub inputs.
