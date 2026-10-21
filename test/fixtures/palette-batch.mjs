@@ -17,7 +17,9 @@ import {readFileSync,writeFileSync,appendFileSync} from 'node:fs';
 import {execFileSync,spawn} from 'node:child_process';
 const step=process.argv[2],cfg=JSON.parse(readFileSync('fixture.json'));
 assert.equal(process.env.INIT_CWD,process.cwd());
-assert.ok(!process.env.NODE_PATH&&!process.env.NODE_OPTIONS);
+// pnpm may add its own module paths; inherited host injection must still be absent.
+assert.ok(!process.env.NODE_PATH?.includes('/this-must-not-be-used'));
+assert.ok(!process.env.NODE_OPTIONS?.includes('/this-must-not-be-imported.mjs'));
 assert.deepEqual(Object.keys(process.env).filter(k=>k.startsWith('GIT_')&&k!=='GIT_OPTIONAL_LOCKS'),[]);
 appendFileSync('.git/events',step+'\\n');
 if(step==='palette:update'){

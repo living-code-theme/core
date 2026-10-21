@@ -126,6 +126,7 @@ test("cancellation drains the process group, prevents late writes and releases l
   const pending = batchPaletteUpdate(f.core, f.ports, { apply: true, signal: controller.signal });
   for (let i = 0; i < 200 && !(await f.events(f.ports[0])).includes("build"); i++) await new Promise(r => setTimeout(r, 25));
   controller.abort(); const report = await pending;
+  assert.match(await f.events(f.ports[0]), /build/, JSON.stringify(report));
   assert.equal(report.ports[0].status, "failed"); await noLock(f.ports[0]);
   await new Promise(r => setTimeout(r, 1400)); assert.equal(await lstat(join(f.ports[0], ".git/late-write")).catch(() => null), null);
 });
