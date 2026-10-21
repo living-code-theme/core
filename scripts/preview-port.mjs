@@ -9,7 +9,8 @@ import { parseArgs } from "node:util";
 import { LIMITS } from "./github-ports.mjs";
 import { repositoryPath, validateManifest } from "./port-manifest.mjs";
 import { discoverPorts, saveDiscovery } from "./sync-ports.mjs";
-import { readmeImagePaths } from "../src/port-readme.mjs";
+import { extractPortGuide, guideImagePaths } from "../src/port-readme.mjs";
+import { loadDiscovery } from "../src/port-snapshot.mjs";
 import { copyLanding, landingCheckout, runLanding } from "../src/landing-checkout.mjs";
 
 /** Freeze local inputs, then use the same validation/image pipeline as real discovery. */
@@ -32,7 +33,7 @@ export async function localPortSnapshot(directory, previous) {
   const metadata = await read("port.json", LIMITS.manifest);
   const manifest = validateManifest(JSON.parse(metadata), name);
   const readme = await read("README.md", LIMITS.readme);
-  const images = new Set([...manifest.images.map((image) => image.path), ...readmeImagePaths(readme.toString("utf8")).filter((path) => /\.(png|jpe?g|webp)$/i.test(path))]);
+  const images = new Set([...manifest.images.map((image) => image.path), ...guideImagePaths(extractPortGuide(readme.toString("utf8"))).filter((path) => /\.(png|jpe?g|webp)$/i.test(path))]);
   if (images.size > 24) throw new Error("At most 24 local README and gallery images are allowed");
   const paths = new Map([...(manifest.files ?? []).map((path) => [path, 1024 * 1024]), ...[...images].map((path) => [path, LIMITS.image])]);
   const inputs = new Map([["port.json", metadata], ["README.md", readme]]);
@@ -52,7 +53,7 @@ export async function localPortSnapshot(directory, previous) {
       return bytes;
     },
   };
-  const result = await discoverPorts(client, previous, { organization: previous.organization });
+  const result = await discoverPorts(client, previous, { organization: previous.organization, assetBase: "/port-images/" });
   if (result.warnings.length) throw new Error(result.warnings.join("\n"));
   return { ...result, slug: manifest.slug, revision };
 }
@@ -63,11 +64,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   } });
   if (positionals.length !== 1 || !/^\d+$/.test(values.port) || Number(values.port) < 1024 || Number(values.port) > 65535) throw new Error("Usage: pnpm preview:port <local-port-directory> --landing <website-checkout> [--port 4411]");
   const source = await landingCheckout(values.landing);
-  const previous = JSON.parse(await readFile(join(source, "data/ports.json"), "utf8"));
+  const previous = await loadDiscovery(source);
   const result = await localPortSnapshot(resolve(positionals[0]), previous);
   const directory = await mkdtemp(join(tmpdir(), "living-code-port-preview-"));
   await copyLanding(source, directory);
-  await saveDiscovery(directory, result);
+  await saveDiscovery(directory, result, { preview: true });
   const run = (args) => runLanding(directory, args);
   run(["install", "--frozen-lockfile", "--prefer-offline"]);
   run(["build"]);

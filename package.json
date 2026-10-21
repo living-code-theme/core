@@ -16,6 +16,7 @@
     "test": "node --test test/*.test.mjs",
     "test:discovery": "node --test test/discovery.test.mjs test/port-template.test.mjs test/preview-port.test.mjs",
     "test:standalone": "node scripts/check-standalone.mjs",
+    "test:scale": "node scripts/check-port-scale.mjs",
     "new:port": "node scripts/new-port.mjs",
     "preview:port": "node scripts/preview-port.mjs",
     "sync:ports": "node scripts/sync-ports.mjs",

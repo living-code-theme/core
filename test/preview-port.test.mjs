@@ -24,7 +24,7 @@ async function fixture(t) {
 test("local preview validates a complete draft through discovery without changing existing ports", async (t) => {
   const { directory } = await fixture(t);
   const previous = emptySnapshot();
-  const existing = { id: "neovim", group: "Editors", repositoryName: "living-code-theme/nvim", revision: "a".repeat(40) };
+  const existing = { id: "neovim", group: "Editors", repositoryName: "living-code-theme/nvim", revision: "a".repeat(40), guide: { schemaVersion: 1, installation: "Existing port instructions", configuration: "", compatibility: "", links: {} }, images: [], guideImages: {} };
   previous.ports.push(existing);
   const before = structuredClone(previous);
   const result = await localPortSnapshot(directory, previous);

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -8,6 +8,7 @@ import { discoverPorts, emptySnapshot, saveDiscovery } from "../scripts/sync-por
 import { githubPorts, GitHubError } from "../scripts/github-ports.mjs";
 import { repositoryPath, validateManifest } from "../scripts/port-manifest.mjs";
 import { renderPortReadme } from "../scripts/readme-template.mjs";
+import { assertSnapshotBudget, loadDiscovery, referencedAssets, SNAPSHOT_LIMITS } from "../src/port-snapshot.mjs";
 
 const SHA = "a".repeat(40);
 const screenshot = await sharp({ create: { width: 16, height: 10, channels: 3, background: "#15202b" } }).png().toBuffer();
@@ -78,14 +79,14 @@ test("a new repo is discovered without a central registration; README, metadata 
   assert.equal(port.repository, "https://github.com/living-code-theme/nvim");
   assert.equal(port.id, "neovim");
   assert.equal(port.emoji, "📝");
-  assert.ok(port.readme.includes("require('living-code')"));
+  assert.ok(port.guide.installation.includes("require('living-code')"));
   assert.deepEqual(port.aliases, ["nvim"]);
   assert.match(port.images[0].src, /^\/port-images\/[a-f0-9]{64}\.webp$/);
   assert.equal(port.images[0].width, 16);
   assert.equal(port.images[0].height, 10);
   assert.equal(assets.size, 1, "README and gallery share a cached image");
   assert.deepEqual(new Set(client.reads.map((r) => r.sha)), new Set([SHA]));
-  assert.deepEqual(snapshot.migratedSlugs, ["neovim"]);
+  assert.equal(snapshot.migratedSlugs, undefined, "publication carries no growing migration history");
 });
 
 test("adding a different port and group extends the snapshot without a code change", async () => {
@@ -101,7 +102,7 @@ test("README-only local images, including raw HTML images, are downloaded from t
   e.files["images/html.png"] = screenshot;
   const client = clientFor([e]);
   const { snapshot } = await discoverPorts(client);
-  assert.equal(Object.keys(snapshot.ports[0].readmeImages).length, 3);
+  assert.equal(Object.keys(snapshot.ports[0].guideImages).length, 2);
   assert.ok(client.reads.some((r) => r.path === "images/html.png"));
   assert.ok(client.reads.every((r) => !r.path.startsWith("https:")));
 });
@@ -148,7 +149,7 @@ test("a complete listing removes archived, deleted or deliberately opted-out por
   for (const entries of [[], [archived], [entry("nvim", { manifest: null })]]) {
     const { snapshot } = await discoverPorts(clientFor(entries), previous, { refresh: true });
     assert.equal(snapshot.ports.length, 0);
-    assert.deepEqual(snapshot.migratedSlugs, ["neovim"]);
+    assert.equal(snapshot.migratedSlugs, undefined, "removed routes do not accumulate in the index");
   }
 });
 
@@ -188,7 +189,11 @@ test("persistence is idempotent, content-addressed and leaves the previous snaps
   const bytes = await readFile(join(dir, "public", result.snapshot.ports[0].images[0].src));
   assert.equal((await sharp(bytes).metadata()).format, "webp");
   await assert.rejects(saveDiscovery(dir, { snapshot: emptySnapshot(), assets: new Map([["../../escape", screenshot]]) }), /Invalid generated/);
-  assert.deepEqual(JSON.parse(await readFile(path)), result.snapshot);
+  assert.deepEqual(await loadDiscovery(dir), result.snapshot);
+  const index = JSON.parse(await readFile(path));
+  assert.equal(index.schemaVersion, 2);
+  assert.equal(index.ports[0].guide, undefined);
+  assert.match(index.ports[0].content, /^ports\/neovim\.[a-f0-9]{64}\.json$/);
 });
 
 test("unchanged commits reuse local content; refresh explicitly revalidates and redownloads it", async () => {
@@ -201,7 +206,7 @@ test("unchanged commits reuse local content; refresh explicitly revalidates and 
   assert.ok(refreshed.reads.some((read) => read.path === "images/night.png"));
 });
 
-test("GitHub adapter paginates, pins non-main branches, and uses GitHub raw file responses", async () => {
+test("GitHub adapter paginates, pins non-main branches, and uses public immutable blobs without forwarding its token", async () => {
   const requests = [];
   const adapter = githubPorts({ token: "test-token", fetchImpl: async (url, options) => {
     requests.push({ url, options });
@@ -216,10 +221,11 @@ test("GitHub adapter paginates, pins non-main branches, and uses GitHub raw file
   assert.ok((await adapter.file(repo, SHA, "images/a b.png", 10000)).equals(screenshot));
   assert.ok(requests.some((r) => r.url.endsWith("/commits/trunk")));
   const raw = requests.at(-1);
-  assert.match(raw.url, new RegExp(`images/a%20b.png\\?ref=${SHA}$`));
-  assert.equal(raw.options.headers.Accept, "application/vnd.github.raw+json");
+  assert.equal(raw.url, `https://raw.githubusercontent.com/living-code-theme/nvim/${SHA}/images/a%20b.png`);
+  assert.equal(raw.options.headers.Accept, "application/octet-stream");
   assert.equal(raw.options.redirect, "error");
-  assert.equal(raw.options.headers.Authorization, "Bearer test-token");
+  assert.equal(raw.options.headers.Authorization, undefined);
+  assert.ok(requests.filter((r) => r.url.startsWith("https://api.github.com/")).every((r) => r.options.headers.Authorization === "Bearer test-token"));
 });
 
 test("GitHub adapter distinguishes a missing manifest from server errors and bounds response size", async () => {
@@ -230,4 +236,94 @@ test("GitHub adapter distinguishes a missing manifest from server errors and bou
   await assert.rejects(failed.file(repo, SHA, "port.json", 100), /GitHub 503/);
   const big = githubPorts({ fetchImpl: async () => new Response("x".repeat(1000)) });
   await assert.rejects(big.file(repo, SHA, "port.json", 100), /exceeds/);
+});
+
+test("image updates replace current captures instead of accumulating history", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "living-code-cache-lifecycle-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  let result = await discoverPorts(clientFor([entry()]));
+  await saveDiscovery(dir, result);
+  const cache = join(dir, "public/port-images");
+  await writeFile(join(cache, ".gitkeep"), "");
+  await writeFile(join(cache, "manual.webp"), "not generated");
+  const target = join(dir, "outside.txt");
+  await writeFile(target, "keep me");
+  await symlink(target, join(cache, `${"f".repeat(64)}.webp`));
+  for (let i = 1; i <= 4; i++) {
+    const image = await sharp({ create: { width: 16, height: 10, channels: 3, background: `rgb(${i * 30},32,43)` } }).png().toBuffer();
+    result = await discoverPorts(clientFor([entry("nvim", { revision: String(i).repeat(40), files: { "images/night.png": image } })]), result.snapshot);
+    assert.equal(await saveDiscovery(dir, result), true);
+    const managed = (await readdir(cache)).filter((name) => referencedAssets(result.snapshot).has(name));
+    assert.equal(managed.length, 1);
+    assert.equal((await readdir(cache)).length, 4, "one current capture, two manual files and an untouched symlink");
+  }
+  assert.equal(await readFile(target, "utf8"), "keep me");
+  assert.equal(await readFile(join(cache, "manual.webp"), "utf8"), "not generated");
+  assert.equal(await saveDiscovery(dir, result), false);
+});
+
+test("shared captures and fallback ports survive pruning; an opted-out port leaves no orphan captures", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "living-code-cache-sharing-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const other = entry("other", { manifest: manifest({ name: "Other", slug: "other" }) });
+  const first = await discoverPorts(clientFor([entry(), other]));
+  await saveDiscovery(dir, first);
+  const fallback = await discoverPorts(clientFor([entry("nvim", { manifest: null }), { ...other, error: new Error("timeout") }]), first.snapshot, { refresh: true });
+  await saveDiscovery(dir, fallback);
+  assert.equal(fallback.snapshot.ports.length, 1);
+  assert.equal((await readdir(join(dir, "public/port-images"))).length, 1);
+  const removed = await discoverPorts(clientFor([]), fallback.snapshot);
+  await saveDiscovery(dir, removed);
+  assert.equal(removed.snapshot.migratedSlugs, undefined);
+  assert.deepEqual(await readdir(join(dir, "public/port-images")), []);
+});
+
+test("oversized README updates retain the last working port, and catalog/count budgets fail closed", async () => {
+  const first = await initial();
+  const readme = fixtureReadme(manifest(), "x".repeat(SNAPSHOT_LIMITS.readmeBytes));
+  const retry = await discoverPorts(clientFor([entry("nvim", { readme })]), first, { refresh: true });
+  assert.deepEqual(retry.snapshot.ports, first.ports);
+  assert.match(retry.warnings[0], /README exceeds/);
+  assert.throws(() => assertSnapshotBudget({ ...first, ports: Array(SNAPSHOT_LIMITS.ports + 1).fill(first.ports[0]) }), /exceeds 1000 ports/);
+  const ports = Array.from({ length: 100 }, (_, i) => ({ ...first.ports[0], id: `app-${i}`, quick: "x".repeat(32 * 1024) }));
+  assert.throws(() => assertSnapshotBudget({ ...first, ports }), /Catalog exceeds/);
+});
+
+test("invalid cache references, oversized catalogs and missing retained assets cannot replace a saved snapshot", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "living-code-cache-failure-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const first = await discoverPorts(clientFor([entry()]));
+  await saveDiscovery(dir, first);
+  const before = await readFile(join(dir, "data/ports.json"), "utf8");
+  const bad = structuredClone(first.snapshot);
+  bad.ports[0].images[0].src = "/port-images/../../escape.webp";
+  await assert.rejects(saveDiscovery(dir, { snapshot: bad, assets: new Map() }), /Invalid cached image/);
+  const large = structuredClone(first.snapshot);
+  large.ports[0].guide.installation = "x".repeat(2 * SNAPSHOT_LIMITS.readmeBytes + 1);
+  await assert.rejects(saveDiscovery(dir, { snapshot: large, assets: new Map() }), /Guide exceeds/);
+  const absent = structuredClone(first.snapshot);
+  const name = `${"b".repeat(64)}.webp`;
+  absent.ports[0].images[0].src = `/port-images/${name}`;
+  await assert.rejects(saveDiscovery(dir, { snapshot: absent, assets: new Map() }), /Missing retained image/);
+  assert.equal(await readFile(join(dir, "data/ports.json"), "utf8"), before);
+  assert.equal((await readdir(join(dir, "public/port-images"))).length, 1);
+});
+
+test("a symlinked image-cache directory is never followed for cleanup", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "living-code-cache-symlink-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await mkdir(join(dir, "public"));
+  await mkdir(join(dir, "external"));
+  const name = `${"c".repeat(64)}.webp`;
+  await writeFile(join(dir, "external", name), "keep me");
+  await symlink(join(dir, "external"), join(dir, "public/port-images"));
+  await assert.rejects(saveDiscovery(dir, { snapshot: emptySnapshot(), assets: new Map() }), /must not be a symlink/);
+  assert.equal(await readFile(join(dir, "external", name), "utf8"), "keep me");
+});
+
+test("repository pagination has a hard bound, rather than allowing an endless full-page response", async () => {
+  let pages = 0;
+  const adapter = githubPorts({ fetchImpl: async () => { pages++; return Response.json(Array.from({ length: 100 }, (_, i) => ({ name: `repo-${i}` }))); } });
+  await assert.rejects(adapter.repositories("living-code-theme"), /listing exceeds 2000/);
+  assert.equal(pages, 21);
 });

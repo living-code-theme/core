@@ -1,9 +1,38 @@
 // Port authoring/discovery rules. Website-specific rendering belongs to the landing.
-import { Marked } from "marked";
+import { Lexer, Marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import { PORT_FLAVORS, README_MARKER, README_SECTIONS } from "../scripts/readme-template.mjs";
 
 const parseReadme = (source) => new Marked({ gfm: true }).parse(source);
+
+/** The versioned publication contract is content, not the README's GitHub presentation. */
+export function extractPortGuide(source) {
+  const tokens = new Marked({ gfm: true }).lexer(source);
+  const sections = new Map(["installation", "configuration", "compatibility"].map((key) => [key, []]));
+  let current;
+  for (const token of tokens) {
+    if (token.type === "heading" && token.depth <= 2) current = token.depth === 2 ? sections.get(token.text.toLowerCase()) : undefined;
+    else if (current) current.push(token.raw);
+  }
+  return {
+    schemaVersion: 1,
+    ...Object.fromEntries([...sections].map(([key, parts]) => [key, parts.join("").trim()])),
+    // Definitions can live in an omitted section. Keep them as data, not Marked's internal token format.
+    links: Object.fromEntries(Object.entries(tokens.links).map(([key, { href, title }]) => [key, { href, title: title ?? "" }])),
+  };
+}
+
+export function guideImagePaths(guide) {
+  const paths = new Set();
+  for (const key of ["installation", "configuration", "compatibility"]) {
+    const marked = new Marked({ gfm: true });
+    const lexer = new Lexer({ gfm: true });
+    lexer.tokens.links = Object.assign(Object.create(null), guide.links);
+    const tokens = lexer.lex(guide[key]);
+    collectImages(marked.parser(tokens), paths);
+  }
+  return [...paths];
+}
 
 /** Only repository-relative images are downloaded; external images are never fetched by discovery. */
 function relativeImagePath(href) {
@@ -13,8 +42,13 @@ function relativeImagePath(href) {
 
 export function readmeImagePaths(source) {
   const paths = new Set();
+  collectImages(parseReadme(source), paths);
+  return [...paths];
+}
+
+function collectImages(html, paths) {
   // Parse Markdown and raw HTML images without importing the website's renderer.
-  sanitizeHtml(parseReadme(source), {
+  sanitizeHtml(html, {
     allowedTags: ["img"], allowedAttributes: {},
     transformTags: { img(tagName, attrs) {
       const path = relativeImagePath(attrs.src);
@@ -22,7 +56,6 @@ export function readmeImagePaths(source) {
       return { tagName, attribs: {} };
     } },
   });
-  return [...paths];
 }
 
 /** The template is shared, but prose and activation instructions stay port-owned. */

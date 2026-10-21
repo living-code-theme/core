@@ -13,7 +13,7 @@ export async function landingCheckout(directory) {
 
 /** Copy only committed build inputs, not credentials, symlinks, dependencies or caches. */
 export async function copyLanding(source, directory) {
-  const excluded = new Set(["node_modules", "dist", ".astro", ".git", ".wrangler"]);
+  const excluded = new Set(["node_modules", "dist", ".astro", ".git", ".wrangler", ".port-discovery.lock"]);
   await cp(source, directory, { recursive: true, filter: async (path) => {
     const parts = relative(source, path).split(sep);
     if (parts.some((part) => excluded.has(part) || part.startsWith(".env") || part.startsWith(".dev.vars"))) return false;

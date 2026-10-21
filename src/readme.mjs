@@ -174,25 +174,31 @@ Palette generation uses only Node built-ins; port tooling dependencies are devel
 
 | Command | What it does |
 |---|---|
-| \`pnpm build\` | Regenerates \`palette.json\`, this README, swatches, brand SVGs and the landing export from \`palette/flavors.mjs\`. |
+| \`pnpm build\` | Regenerates \`palette.json\`, the portable port palette, this README, swatches, brand SVGs and the landing export from \`palette/flavors.mjs\`. |
 | \`pnpm check\` | Fails if a generated file is stale or a text role drops below 4.5:1. CI runs it. |
 | \`pnpm test\` | Runs the test suite. |
 | \`pnpm preview\` | Live palette preview with sliders and exports at <http://localhost:4173/preview/>. |
 | \`pnpm screenshots\` | Recaptures \`assets/preview-*.png\` from the preview with headless Chrome (\`CHROME_BIN\` overrides \`google-chrome\`). |
 | \`pnpm icons:brand\` | Rasterizes the brand SVGs to PNG and ICO. See [\`assets/brand\`](assets/brand/README.md). |
 | \`pnpm new:port <directory> --name "App" --group "Editors" --emoji "📝"\` | Scaffolds a port's README, metadata and license. |
-| \`pnpm sync:ports --landing <checkout>\` | Discovers public ports and writes validated snapshots/captures to the website. Supports \`--dry-run\` and \`--refresh\`. |
+| \`pnpm sync:ports --landing <checkout>\` | Discovers public ports and writes validated snapshots/captures to the website. Supports \`--dry-run\`, \`--refresh\` and optional \`--r2\` storage. |
 | \`pnpm preview:port <directory> --landing <checkout>\` | Validates a local port and previews it in an isolated website copy. |
 | \`pnpm export:landing --landing <checkout>\` | Delivers the generated theme JSON, CSS and hosted port schema to the website. Run \`pnpm build\` first. |
 | \`pnpm test:standalone --landing <checkout>\` | Installs, builds and tests only the website in isolation. Supports \`--keep\`. |
+| \`pnpm test:scale --landing <checkout>\` | Exercises 400 synthetic ports, immutable publication and a real isolated offline website build/test. Supports \`--keep\` and \`--report <new-file>\`. |
 
 To change a color, edit [\`palette/flavors.mjs\`](palette/flavors.mjs) and run \`pnpm build\`. Do not edit generated files directly.
 
-A palette change does not touch any port: each port repository owns its files and updates them in its own pull request.
+A palette change does not touch any port: each port repository owns its generator, application mappings, tests and files.
+Core exports app-agnostic resolved inputs in [\`exports/ports/palette.json\`](exports/ports/palette.json). A port explicitly
+adopts a committed core revision with \`pnpm palette:update /path/to/core\`, then regenerates and reviews its own files.
+Normal port builds use the checked-in pin and never read a sibling checkout or fetch from GitHub.
 The website takes committed inputs from [\`exports/landing/\`](exports/landing). After \`pnpm build\`, run
 \`pnpm export:landing --landing <checkout>\` and review the changes there. Port discovery, validation, templates and
 preview/verification runners live here in core; landing contains Astro and website presentation only. No normal
-website build imports core or needs GitHub access. See [Port repositories](docs/PORTS.md) for the full workflow.
+website build imports core or needs GitHub access. See [Port repositories](docs/PORTS.md) for authoring and
+[Port publication and capacity](docs/PORT-PUBLICATION.md) for the split index/documents, batched discovery,
+optional external capture storage and 400-port acceptance check.
 
 ## License
 

@@ -7,6 +7,7 @@ import { brandFiles } from "../src/brand.mjs";
 import { contrast } from "../src/color.mjs";
 import { landingFiles, MINIMUM_CONTRAST, TEXT_ROLES } from "../src/landing.mjs";
 import { paletteJson } from "../src/outputs.mjs";
+import { paletteSnapshotJson } from "../src/palette-snapshot.mjs";
 import { readme, swatchPath } from "../src/readme.mjs";
 import { resolveAll } from "../src/resolve.mjs";
 
@@ -20,6 +21,7 @@ function generatedFiles() {
   const swatches = new Set(flavors.flatMap((f) => [...Object.values(f.colors).map((c) => c.hex), ...f.ansi.normal, ...f.ansi.bright]));
   return [
     { path: "palette.json", content: paletteJson(flavors) },
+    { path: "exports/ports/palette.json", content: paletteSnapshotJson(flavors) },
     { path: "README.md", content: text },
     ...brandFiles(night),
     ...landingFiles(flavors, { readme: text }),

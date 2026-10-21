@@ -106,14 +106,15 @@ The Contributing section links to the port's issue forms, which every repository
 Keep the `<!-- living-code-readme:1 -->` marker and the `data-lc-flavors` / `data-lc-flavor` attributes. Use `###`
 headings for extra topics. Only advertise flavors listed in `port.json`.
 
-GitHub shows the full README. The website derives a shorter page from it: installation first, then collapsed
-configuration, compatibility and included files, with its own flavor controls and screenshots. It renders sanitized
-Markdown only; it never runs repository scripts.
+GitHub shows the full README. Discovery compiles a versioned Markdown guide: installation, configuration,
+compatibility and reference definitions, independent of the GitHub table/dropdowns. The website renders that guide
+with installation first, optional details collapsed and its own flavor controls/screenshots. It sanitizes Markdown
+and never runs repository scripts. There is no separately authored website documentation.
 
 Discovery validates the structure, rejects unfinished placeholders and checks that declared captures appear in the
 grid and in their flavor's dropdown. An invalid update keeps the port's last working version on the website.
 
-Limits: 32 KiB metadata, 512 KiB README, 10 MiB and 20 million pixels per image, 24 distinct local images per port.
+Limits: 32 KiB metadata, 64 KiB README, 10 MiB and 20 million pixels per input image, 24 distinct gallery/guide images per port.
 
 ## Discovery
 
@@ -126,14 +127,39 @@ GH_TOKEN="$(gh auth token)" pnpm sync:ports --landing ../landing
 ```
 
 Core lists the organization's public repositories and reads `port.json`, the README, listed files and screenshots
-from **one commit** of each. Review and commit the resulting `data/ports.json` and `public/port-images/` in landing.
-Authentication is optional for public repositories; it raises rate limits. Visitors never query GitHub. No scheduled
-cross-repository delivery is configured here.
+from **one commit** of each. Review and commit `data/ports.json`, `data/ports/` and any local capture changes in landing.
+Authenticated discovery batches heads in groups of 100 and downloads changed public blobs without forwarding its
+token. Large catalogs require `GH_TOKEN`; small anonymous runs remain supported. Visitors never query GitHub.
+Landing owns the scheduled publication/deployment workflow, not core.
 
 - No `port.json`: not opted in. A new invalid port is reported and skipped.
 - A malformed update, timeout or unreadable capture keeps that port's last working snapshot.
 - Archiving or deleting a repository, making it private, or removing `port.json` removes it from the website.
 - Incomplete listings, authentication failures and rate limits abort without replacing the snapshot.
+
+### Catalog and capture capacity
+
+Schema 2 separates a small metadata index (`data/ports.json`) from immutable, content-addressed per-port documents
+(`data/ports/<slug>.<sha256>.json`). Unchanged documents are not rewritten; there is no growing route-history list.
+The website loads only a port's own guide for its page. Both tools read the previous catalog format during rollout.
+
+Publication validates retained captures and write targets under a writer lock, writes assets/documents first,
+atomically replaces the index, then prunes only obsolete generated regular files. Invalid individual updates keep
+their last working version; aggregate budget failures abort without dropping ports or truncating instructions.
+
+Local capture storage remains the default. Optional `--r2` publishes verified immutable captures before the index,
+keeping future image churn out of Git. It requires explicitly configured bucket-scoped credentials and a working
+public URL; it never creates a bucket, changes DNS or automatically deletes remote deployment assets.
+
+See [Port publication and capacity](PORT-PUBLICATION.md) for the versioned contract, budgets, request counts,
+R2 setup/retention policy, safe rollout and the reproducible **400-port acceptance check**:
+
+```sh
+pnpm test:scale --landing ../landing --keep --report /tmp/living-code-scale.json
+```
+
+Landing still checks out a reviewed, pinned core revision. Publish the new core code and advance that SHA to adopt
+this behavior; local tests do not activate it in production. Normal website builds remain independent of core.
 
 ## Deliver generated website inputs
 
@@ -151,5 +177,23 @@ sibling repository or runs during a normal Astro build.
 
 ## After a palette change
 
-The core never writes into port repositories. When `palette/flavors.mjs` changes, update each port's theme files in
-that port's own pull request, then refresh its screenshots if the change is visible.
+The core never writes into port repositories. Each port owns `src/generate.mjs`, its application vocabulary,
+`test/` contracts/fixtures and its `scripts/generated.json` allowlist. Core owns only the app-agnostic palette/math
+and the resolved export at `exports/ports/palette.json`.
+
+1. In core, change `palette/flavors.mjs`, then run `pnpm build`, `pnpm check` and `pnpm test`. Commit the reviewed
+   palette/math inputs so another checkout can reproduce the same revision.
+2. In each port that should adopt it, run `pnpm palette:update /path/to/core`. This explicit maintainer command
+   verifies the export against the committed palette/resolver/math files, records that Git revision and a content
+   fingerprint in `palette/theme.json`, and refuses dirty/stale inputs. If the math implementation changed, review
+   and copy core's committed `src/color.mjs` to the port's `scripts/color.mjs` before adopting it.
+3. Run `pnpm build`, `pnpm check` and `pnpm test` in that port. Build uses **only the checked-in palette pin**, never
+   core, GitHub or another port. It regenerates only the allowlisted theme payload, not READMEs, screenshots,
+   package metadata, marketplace identities, icons, licenses or publishing workflows.
+4. Review the pin, application-specific mappings and generated diff in that port's pull request. Refresh real
+   screenshots if the change is visible. Relevant grammar/capture/UI/ANSI/native-format tests live with the port;
+   update the expected role contracts intentionally rather than silencing a mismatch.
+
+Changes to port mappings or this port's format belong in that repository even when its palette pin stays unchanged.
+`pnpm check` and packaging refuse stale generated payloads; they never regenerate during installation or publishing.
+See each port's `CONTRIBUTING.md` for its maintenance commands and any fixture-refresh tools.
