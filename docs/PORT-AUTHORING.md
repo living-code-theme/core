@@ -4,6 +4,8 @@ A port is an independently maintained application theme, not a new case in a cen
 implementation, generator, tests, README, screenshots, version and release process.
 
 For existing-port changes, start with that repository's `CONTRIBUTING.md`. For new ports, use the workflow below.
+The [agent and developer-tool expansion notes](PORT-EXPANSION.md) provide worked examples, upstream API references,
+coverage limitations and the verification/publication checklist for a multi-port rollout.
 Contributors without organization access can submit a prototype through the
 [port-request form](https://github.com/living-code-theme/core/issues/new?template=port-request.yml); maintainers arrange
 review and an organization repository. You do not need permission to edit landing.
