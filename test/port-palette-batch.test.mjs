@@ -23,7 +23,7 @@ test("apply runs each owner's updater/build/check/test, records exact revision a
   const f = await batchFixture(t);
   const heads = f.ports.map(p => git(p, "rev-parse", "HEAD"));
   const report = await batchPaletteUpdate(f.core, f.ports, { apply: true, revision: f.revision, concurrency: 2 });
-  assert.ok(report.ready); assert.ok(report.ports.every(p => p.status === "updated"));
+  assert.ok(report.ready, JSON.stringify(report)); assert.ok(report.ports.every(p => p.status === "updated"), JSON.stringify(report));
   for (const [i, port] of f.ports.entries()) {
     assert.equal(git(port, "rev-parse", "HEAD"), heads[i]); assert.equal(git(port, "diff", "--cached", "--name-only"), "");
     assert.equal(await f.events(port), "palette:update\nbuild\ncheck\ntest\n");
