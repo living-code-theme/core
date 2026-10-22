@@ -99,6 +99,23 @@ class CaptureContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'regular file'):
             capture.inputs(self.root)
 
+    def test_capture_publication_never_follows_output_links_into_user_files(self):
+        with tempfile.TemporaryDirectory(prefix='living-code-outside-') as directory:
+            outside = Path(directory) / 'user-settings'
+            outside.write_bytes(b'preserve user settings')
+            target = self.root / 'images/night.png'
+            target.unlink()
+            target.symlink_to(outside)
+            capture.replace_output(self.root, 'images/night.png', b'new capture')
+            self.assertEqual(outside.read_bytes(), b'preserve user settings')
+            self.assertEqual(target.read_bytes(), b'new capture')
+            self.assertFalse(target.is_symlink())
+            (self.root / 'dist').symlink_to(directory, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, 'escapes'):
+                capture.replace_output(self.root, 'dist/capture-preview/paper.png', b'new capture')
+            self.assertFalse((Path(directory) / 'capture-preview').exists())
+            self.assertFalse(list((self.root / 'images').glob('.capture-*')))
+
     def test_failed_programs_cannot_pass_as_a_shell_rendering_fixture_text(self):
         state = lambda command: [{'tabs': [{'windows': [{'foreground_processes': [{'cmdline': command}]}]}]}]
         self.assertTrue(capture.has_application(state(['/nix/store/example/bin/.crush-wrapped']), 'crush'))

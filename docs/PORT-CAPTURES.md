@@ -80,7 +80,8 @@ NixOS host's `/run/opengl-driver`, which is absent on fresh GitHub runners. Nati
 `capture/config.json` names the native `versionCommand`, truthful `scene`, and all extra `fixtures`. The runner
 fingerprints these, its own code, the adapter, descriptor, palette pin, runtime pin and every distributable payload.
 It stages **all** supported flavors first, checks real PNG dimensions and observed palette colors, then replaces
-published files and provenance only after the entire set succeeds. Read-only checks reject missing/stale inputs,
+published files and provenance only after the entire set succeeds. Output replacement is atomic per file and
+must not follow image/metadata links into user files or escaped preview directories. Read-only checks reject missing/stale inputs,
 changed PNG bytes and incomplete flavor coverage. An explicit single-flavor preview writes only under `dist/`.
 
 ## Commands and CI

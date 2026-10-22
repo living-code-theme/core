@@ -71,6 +71,23 @@ def check(root):
     return record
 
 
+def replace_output(root, name, content):
+    destination = root / name
+    parent = destination.parent.resolve()
+    if parent != root and root not in parent.parents:
+        raise ValueError(f'Capture output escapes its repository: {name}')
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=destination.parent, prefix='.capture-', delete=False) as pending:
+        temporary = Path(pending.name)
+        try:
+            pending.write(content)
+            pending.flush()
+            os.fchmod(pending.fileno(), 0o644)
+            os.replace(temporary, destination)  # Replace a link itself; never follow it into user files.
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
 def has_application(state, application):
     processes = [process for window in state for tab in window['tabs'] for pane in tab['windows']
                  for process in pane.get('foreground_processes', [])]
@@ -294,9 +311,7 @@ def capture(root, force=False, only=None):
                         image = temporary / f'{id}.png'
                         context.run(['magick', 'import', '-window', 'root', '-depth', '8', '-strip', f'PNG:{image}'])
                         if os.environ.get('CAPTURE_DEBUG'):
-                            debug = root / 'dist/capture-debug'
-                            debug.mkdir(parents=True, exist_ok=True)
-                            shutil.copyfile(image, debug / f'{id}.png')
+                            replace_output(root, f'dist/capture-debug/{id}.png', image.read_bytes())
                         if png_size(image) != (WIDTH, HEIGHT):
                             raise RuntimeError('Unexpected screenshot dimensions')
                         histogram = context.run(['magick', image, '-format', '%c', 'histogram:info:-']).lower()
@@ -325,8 +340,7 @@ def capture(root, force=False, only=None):
                             context.cleanup()
                 if only:
                     destination = root / 'dist/capture-preview'
-                    destination.mkdir(parents=True, exist_ok=True)
-                    shutil.copyfile(temporary / f'{only}.png', destination / f'{only}.png')
+                    replace_output(root, f'dist/capture-preview/{only}.png', (temporary / f'{only}.png').read_bytes())
                     print(f'Preview only: {destination / (only + ".png")}; committed captures were not changed.')
                     return
                 if before != inputs(root):
@@ -334,11 +348,9 @@ def capture(root, force=False, only=None):
                 if set(evidence) != set(manifest['flavors']):
                     raise RuntimeError('Not all supported flavors were captured; images were not replaced')
                 for id, item in evidence.items():
-                    destination = root / item['path']
-                    destination.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copyfile(temporary / f'{id}.png', destination)
-                (root / 'images/capture.json').write_text(json.dumps({'schemaVersion': 1, 'scene': config['scene'],
-                    'inputs': before, 'images': evidence}, indent=2) + '\n')
+                    replace_output(root, item['path'], (temporary / f'{id}.png').read_bytes())
+                replace_output(root, 'images/capture.json', (json.dumps({'schemaVersion': 1, 'scene': config['scene'],
+                    'inputs': before, 'images': evidence}, indent=2) + '\n').encode())
             finally:
                 xvfb.terminate()
                 xvfb.wait(timeout=5)

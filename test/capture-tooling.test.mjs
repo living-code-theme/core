@@ -14,5 +14,5 @@ test("vendored capture contract: integrity, freshness, native 2× dimensions, co
     return;
   }
   assert.equal(result.status, 0, result.error?.message ?? result.stderr);
-  assert.match(result.stderr, /Ran 7 tests/);
+  assert.match(result.stderr, /Ran 8 tests/);
 });
