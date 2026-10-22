@@ -15,6 +15,8 @@ Upload **`github-avatar.png`** as the organization profile picture.
 - Visible glyph bounds are centered, with enough clearance for a circular crop.
 - `github-avatar.svg` is the resolution-independent master.
 
+`publisher-128.png` is the 128 × 128 sRGB PNG for publisher profiles, rendered from the same master with the same circle-safe padding.
+
 The master has no baked-in rounded corners, so it also works when reused as an app/touch icon with a platform-supplied mask.
 
 ## Website

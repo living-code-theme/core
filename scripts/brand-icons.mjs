@@ -12,6 +12,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const targets = [
   { source: "assets/brand/github-avatar.svg", size: 1024, path: "assets/brand/github-avatar.png" },
   { source: "assets/brand/github-avatar.svg", size: 180, path: "assets/brand/apple-touch-icon.png" },
+  { source: "assets/brand/github-avatar.svg", size: 128, path: "assets/brand/publisher-128.png" },
   ...[16, 32, 48].map((size) => ({ source: "assets/brand/favicon.svg", size, path: `assets/brand/favicon-${size}.png` })),
 ];
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");

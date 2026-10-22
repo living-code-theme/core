@@ -55,6 +55,7 @@ test("raster assets are current with their source vectors and have the required 
   const expected = {
     "assets/brand/github-avatar.png": 1024,
     "assets/brand/apple-touch-icon.png": 180,
+    "assets/brand/publisher-128.png": 128,
     ...Object.fromEntries([16, 32, 48].map((size) => [`assets/brand/favicon-${size}.png`, size])),
   };
   for (const [path, size] of Object.entries(expected)) {
