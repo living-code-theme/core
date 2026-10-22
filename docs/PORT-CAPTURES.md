@@ -72,7 +72,10 @@ Do not bake application cases into the shared runner.
 
 The child environment strips provider credentials, user config/data/cache/state/runtime paths and the user's
 D-Bus session. Xvfb listens only locally, and every capture uses its own terminal control socket. A graphical
-software renderer is acceptable: the application still owns rendering and theme parsing.
+software renderer is acceptable: the application still owns rendering and theme parsing. Capture flakes must
+set `CAPTURE_MESA = "${pkgs.mesa}";` in their development shell. The runner explicitly selects that locked
+Mesa EGL vendor and llvmpipe driver; do not depend on a NixOS host's `/run/opengl-driver`, which is absent on
+fresh GitHub runners. Native process diagnostics are retained in the disposable profile and printed on failure.
 
 `capture/config.json` names the native `versionCommand`, truthful `scene`, and all extra `fixtures`. The runner
 fingerprints these, its own code, the adapter, descriptor, palette pin, runtime pin and every distributable payload.

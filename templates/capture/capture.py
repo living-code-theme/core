@@ -86,6 +86,8 @@ class Context:
         self.slug = f'living-code-{flavor["id"]}'
         self.socket = home / 'terminal.sock'
         self.children = []
+        self.terminal_process = None
+        self.process_log = home / 'capture-process.log'
         self.env = {key: os.environ[key] for key in ('PATH', 'FONTCONFIG_FILE', 'FONTCONFIG_PATH', 'TERMINFO_DIRS', 'LOCALE_ARCHIVE', 'SSL_CERT_FILE') if key in os.environ}
         self.env.update(HOME=str(home), XDG_CONFIG_HOME=str(home / '.config'), XDG_CACHE_HOME=str(home / '.cache'),
                         XDG_DATA_HOME=str(home / '.local/share'), XDG_STATE_HOME=str(home / '.local/state'),
@@ -93,6 +95,10 @@ class Context:
                         LANG='C.UTF-8', LC_ALL='C.UTF-8', TERM='xterm-kitty', COLORTERM='truecolor',
                         SHELL=shutil.which('bash') or '/bin/sh', LIBGL_ALWAYS_SOFTWARE='1',
                         DBUS_SESSION_BUS_ADDRESS='unix:path=' + str(home / 'no-session-bus'))
+        if mesa := os.environ.get('CAPTURE_MESA'):
+            # libglvnd must use the locked Mesa vendor, not /run/opengl-driver from a NixOS host.
+            self.env.update(__EGL_VENDOR_LIBRARY_FILENAMES=f'{mesa}/share/glvnd/egl_vendor.d/50_mesa.json',
+                            LIBGL_DRIVERS_PATH=f'{mesa}/lib/dri', GALLIUM_DRIVER='llvmpipe')
         for name in ('.config', '.cache', '.local/share', '.local/state', 'runtime', 'tmp'):
             (home / name).mkdir(parents=True, exist_ok=True)
         (home / 'runtime').chmod(0o700)
@@ -144,8 +150,9 @@ export class FieldRenderer {
                               text=True, capture_output=True, timeout=20, **kwargs).stdout
 
     def spawn(self, command):
-        process = subprocess.Popen([str(x) for x in command], cwd=self.work, env=self.env,
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        with self.process_log.open('ab') as output:
+            process = subprocess.Popen([str(x) for x in command], cwd=self.work, env=self.env,
+                                       stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
         self.children.append(process)
         return process
 
@@ -163,7 +170,8 @@ export class FieldRenderer {
         args = ['kitty', '--config', 'NONE', '--listen-on', f'unix:{self.socket}', '--title', 'Living Code capture', '--hold']
         for key, value in options.items():
             args += ['--override', f'{key}={value}']
-        return self.spawn(args + [str(x) for x in command])
+        self.terminal_process = self.spawn(args + [str(x) for x in command])
+        return self.terminal_process
 
     def remote(self, *args):
         return self.run(['kitty', '@', '--to', f'unix:{self.socket}', *args])
@@ -174,6 +182,8 @@ export class FieldRenderer {
     def wait_text(self, pattern, timeout=30):
         deadline, last = time.monotonic() + timeout, ''
         while time.monotonic() < deadline:
+            if self.terminal_process is not None and self.terminal_process.poll() is not None:
+                raise RuntimeError(f'Native terminal exited with status {self.terminal_process.returncode}')
             try:
                 last = self.text()
                 if re.search(pattern, last, re.I):
@@ -221,6 +231,8 @@ def capture(root, force=False, only=None):
             return
     except (ValueError, KeyError, FileNotFoundError):
         pass
+    if not os.environ.get('CAPTURE_MESA'):
+        raise RuntimeError('Missing locked software renderer. Set CAPTURE_MESA in capture/flake.nix and run pnpm screenshots.')
     for binary in ('Xvfb', 'xdotool', 'kitty', 'magick'):
         if not shutil.which(binary):
             raise RuntimeError(f'Missing {binary}. Run pnpm screenshots through the pinned capture/flake.nix environment.')
@@ -290,6 +302,10 @@ def capture(root, force=False, only=None):
                         name = next(image['path'] for image in manifest['images'] if image['flavor'] == id)
                         evidence[id] = {'path': name, 'sha256': digest(image), 'application': version, 'paletteColors': colors}
                         print(f'{manifest["name"]} {id}: captured the real application ({len(colors)} palette colors)', flush=True)
+                    except Exception:
+                        if context.process_log.exists():
+                            print('Native process diagnostics:\n' + context.process_log.read_text(errors='replace')[-5000:], file=sys.stderr)
+                        raise
                     finally:
                         try:
                             if hasattr(app, 'cleanup'):

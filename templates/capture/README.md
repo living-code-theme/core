@@ -17,6 +17,7 @@ Core maintains reusable reviewed templates in `templates/capture/`:
   `fixtures: []` (or list every additional recipe input). The runner fingerprints these plus every theme payload,
   its own code, the adapter, descriptor, palette and runtime pin.
 - Add a reviewed `capture/flake.nix` and `capture/flake.lock` containing the actual app and pinned screenshot tools.
+  Set `CAPTURE_MESA = "${pkgs.mesa}";` in the shell so Kitty uses the locked software renderer, not host GPU drivers.
   The worked agent/developer-tool ports demonstrate isolated native environments; do not copy another app's adapter.
 - Add `screenshots` and `screenshots:check` package commands, wire the latter into `check` and packaging, and
   adapt `check.yml` so CI captures before validation. Preserve app-specific native checks and publishing rules.

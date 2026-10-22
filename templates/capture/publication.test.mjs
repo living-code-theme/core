@@ -58,7 +58,7 @@ fs.copyFileSync(path.join(process.env.PORT_ROOT, source), target);
 fs.appendFileSync(process.env.INSTALL_LOG, JSON.stringify({source, destination:target}) + '\\n');
 `, { mode: 0o755 });
   for (const command of ["aider", "btm", "gitui", "codex", "pi", "posting", "nu"]) {
-    await writeFile(join(bin, command), '#!/bin/sh\n' + (command === "nu" ? 'printf "%s\\n" "$XDG_CONFIG_HOME/nushell"\n' : command === "posting" ? 'if [ "$1" = locate ]; then printf "%s\\n" "$XDG_DATA_HOME/posting/themes"; fi\n' : 'exit 0\n'), { mode: 0o755 });
+    await writeFile(join(bin, command), '#!/bin/sh\n' + (command === "nu" ? 'printf "%s\\n" "$XDG_CONFIG_HOME/nushell"\n' : command === "posting" ? 'if [ "$1" = locate ]; then printf "Themes directory:\\n%s\\n" "$XDG_DATA_HOME/posting/themes"; fi\n' : 'exit 0\n'), { mode: 0o755 });
   }
   const existing = [join(variables.claude, "settings.json"), join(variables.codex, "config.toml"),
     join(variables.herdr, "config.toml"), join(variables.docker, "config.yml"), join(home, ".aider.conf.yml"),
