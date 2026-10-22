@@ -1,7 +1,7 @@
 name: Request a port
 description: Ask for Living Code in an app that does not have a port yet.
 title: "[Port]: "
-labels: ["enhancement"]
+labels: ["port request"]
 body:
   - type: markdown
     attributes:

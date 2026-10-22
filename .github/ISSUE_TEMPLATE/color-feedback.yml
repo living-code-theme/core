@@ -1,6 +1,7 @@
 name: Palette or color feedback
 description: A color, contrast or semantic-role problem that affects every app.
 title: "[Color]: "
+labels: ["palette"]
 body:
   - type: markdown
     attributes:
