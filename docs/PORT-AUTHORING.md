@@ -36,8 +36,10 @@ pnpm new:port ../my-app --name "My App" --group "Editors" --emoji "📝"
 ```
 
 Choose an application-specific emoji, not the shared chameleon mascot. The directory must be empty. The command
-creates only `README.md`, `port.json`, `LICENSE` and `images/`. It does **not** create a Git repository, application
-implementation, palette pin, generator, package, tests or CI. Never use it to update an existing port.
+creates `README.md`, `port.json`, `LICENSE`, `images/` and `capture/README.md`, the mandatory capture/install checklist.
+It does **not** create a Git repository, application implementation, palette pin, generator, package, tests or CI.
+`--no-images` is for a draft/prototype only; new published ports require every supported flavor's real capture.
+Never use the scaffold to update an existing port.
 
 ## 3. Implement the application and its local build
 
@@ -76,8 +78,10 @@ Expose the standard maintainer commands:
   "scripts": {
     "palette:update": "node scripts/update-palette.mjs",
     "build": "node scripts/generate.mjs",
-    "check": "node scripts/check.mjs",
-    "test": "node --test test/*.test.mjs"
+    "check": "node scripts/check.mjs && python3 scripts/capture.py --check",
+    "test": "node --test test/*.test.mjs",
+    "screenshots": "nix develop path:./capture --command python3 scripts/capture.py",
+    "screenshots:check": "python3 scripts/capture.py --check"
   }
 }
 ```
@@ -93,9 +97,17 @@ Follow [the port.json and README contract](PORTS.md). In particular:
 - List only supported flavors and actual distributable files in `port.json`. Use the hosted schema URL; do not add a
   local schema copy. Keep a published slug stable.
 - Complete every README placeholder with tested installation, activation, configuration and compatibility steps.
+  File-based themes use `flavor=night` and quoted `curl -fsSL --create-dirs` downloads straight into the native
+  theme directory, honoring app/XDG overrides. Do not make users clone, `cd` or build. Preserve existing config;
+  apps without an import feature need a separate downloaded fragment and a non-destructive merge.
   Keep the README version marker, section order, comparison table and flavor dropdown attributes.
-- Capture the actual application with the theme loaded. Declared image paths must exist. If there are no captures,
-  use `images: []` and honest README copy, not fake screenshots. Check contrast, syntax distinctions and native UI.
+- Capture the actual application with the theme loaded for **every supported flavor**, at **2560×1600** with
+  native 2× layout scale, never by upscaling. Vendor the reviewed runner and implement the app's own capture
+  adapter, locked runtime, provenance and automatic CI refresh. Declared paths must exist and pass offline
+  freshness/integrity tests; `images: []` is not acceptable for a new published port. No mockups.
+- Follow [Native port screenshots and direct installation](PORT-CAPTURES.md) and its reviewed templates. Add
+  installer tests that execute the README download block for all flavors in temporary/custom/space-containing
+  paths without overwriting existing config. Check contrast, syntax distinctions and native UI in real captures.
 - Preserve legal/font credits. Packaging/marketplace identity and versions are owned by this repository; do not use
   another port's publisher identifiers or assume an organization marketplace listing already exists.
 
@@ -106,11 +118,14 @@ In the new port, after providing its maintenance code:
 ```sh
 pnpm install
 pnpm build
+pnpm screenshots
 pnpm check
 pnpm test
 ```
 
-Commit the resulting lockfile. CI should subsequently use `pnpm install --frozen-lockfile`. Validate installation in
+Commit the resulting lockfiles and real images. CI must capture stale/missing images before validation, upload
+preview artifacts, and commit only validated `images/` changes on accepted main-branch updates. Maintenance needs
+Python 3; recapture uses the locked Linux/Nix native environment. CI uses `pnpm install --frozen-lockfile`. Validate installation in
 the real application as well; a valid JSON/XML file alone does not establish correct highlighting.
 
 From core, preview the port without publishing:

@@ -128,8 +128,12 @@ test("new-port scaffold writes README, metadata with a hosted schema reference, 
   assert.throws(() => validateReadmeTemplate(readme, meta), /placeholder/);
   assert.deepEqual(JSON.parse(await readFile(join(dir, "port.json"), "utf8")), { $schema: "https://living-code.dev/port.schema.json", ...meta });
   assert.match(await readFile(join(dir, "LICENSE"), "utf8"), /MIT License/);
-  assert.deepEqual((await readdir(dir)).sort(), ["LICENSE", "README.md", "images", "port.json"], "no local schema or image notes");
+  assert.deepEqual((await readdir(dir)).sort(), ["LICENSE", "README.md", "capture", "images", "port.json"], "capture contract included, no local schema");
   assert.deepEqual(await readdir(join(dir, "images")), []);
+  const captureGuide = await readFile(join(dir, "capture/README.md"), "utf8");
+  assert.match(captureGuide, /Every new Living Code port/);
+  assert.match(captureGuide, /automatically repeatable capture recipe/);
+  assert.match(captureGuide, /curl -fsSL --create-dirs/);
   await assert.rejects(newPort(dir, meta), /empty output directory/);
   assert.equal(await readFile(join(dir, "README.md"), "utf8"), readme);
 });

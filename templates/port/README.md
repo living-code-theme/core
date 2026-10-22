@@ -11,6 +11,7 @@
 
 ## Installation
 
+<!-- File-based themes: use a temporary flavor=night variable and curl --create-dirs directly to the native theme folder. Show activation, preserve existing config, and do not require git clone/cd/build. -->
 {{INSTALLATION}}
 
 ## Flavors

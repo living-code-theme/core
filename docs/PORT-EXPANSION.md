@@ -53,13 +53,20 @@ is not counted as a new application implementation.
 - CI for frozen installation, validation, tests and packaging; verified theme archives uploaded as workflow artifacts.
 - Packaging that consumes verified committed payloads, never secretly rebuilding or adopting palette changes.
 
-All ports intentionally declare `images: []`. Pseudo-terminal output and passing parsers are not visual screenshots.
-Add real application captures later; never fill the website with generated mockups.
+The capture/install follow-up supplies **64 actual application screenshots**, four per port, at **2560×1600**
+with native 2× layout scale (not upscaled). Each port owns `capture/app.py`, a locked Nix runtime, vendored runner,
+input/image provenance and automatic CI refresh. Agent scenes use native previews, disclosed local fixtures or
+unsent input, not paid model calls. Lazydocker uses a local Docker API fixture; Herdr uses an isolated session.
+All 16 READMEs now use flavor-selected direct native-file downloads instead of clone/`cd`/copy installation.
+Existing configs are preserved, with explicit merges for Herdr/Lazydocker's embedded theme settings.
+See [the mandatory future-port capture/install contract](PORT-CAPTURES.md).
 
 ## Verification evidence and its limits
 
-- **160 port tests:** ten per repository, including all four native flavor contracts, generation determinism,
-  stale checks, containment, palette fingerprints and dirty/stale palette-adoption rejection.
+- **208 port tests:** thirteen per repository, including all four native flavor contracts, generation determinism,
+  stale checks, containment, palette fingerprints, dirty/stale palette-adoption rejection, 2560×1600 capture
+  integrity/freshness, clone-free installation and execution of every flavor's exact download block in temporary
+  custom/space-containing homes without overwriting existing configs.
 - **Real application checks:** all four flavors render pinned palette colors in real pseudo-terminals under
   bottom 0.14.9, GitUI 0.28.1, Television 0.15.9 and micro 2.0.15. Nushell 0.116.1 imports every module and accepts
   its `color_config` assignment. These five checks are repeatable through `test:native` and separate CI jobs;
@@ -74,7 +81,9 @@ Add real application captures later; never fill the website with generated mocku
 
 ## Publishing this wave
 
-1. Run frozen installation, `pnpm check`, `pnpm test`, applicable `pnpm test:native`, and `pnpm package` in each port.
+1. Run frozen installation, `pnpm screenshots`, `pnpm check`, `pnpm test`, applicable `pnpm test:native`, and
+   `pnpm package` in each port. A normal capture command reuses verified current images; `-- --force` or manual
+   CI dispatch explicitly recaptures the real apps. Native previews and archives are uploaded as CI artifacts.
 2. Commit each standalone repository and push its accepted `main` branch to `living-code-theme/<app>`.
 3. Check every repository's CI, including native jobs where present. Publishing source is not a marketplace release.
 4. Manually dispatch the existing website workflow for immediate discovery:

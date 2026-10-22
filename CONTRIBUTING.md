@@ -3,7 +3,10 @@
 Choose the repository that owns the change:
 
 - **New application port:** follow [Creating and contributing a port](docs/PORT-AUTHORING.md), then the
-  [metadata/README contract](docs/PORTS.md). The scaffold creates documentation, not an application implementation.
+  [metadata/README contract](docs/PORTS.md) and [native capture/install contract](docs/PORT-CAPTURES.md).
+  New ports require automatically refreshed real 2560×1600 captures for every supported flavor and direct,
+  flavor-selected native installation, not clone/copy instructions. The scaffold includes this checklist but
+  does not invent an application implementation.
 - **Existing application port:** open its issue form or pull request in that port's repository. Follow its
   `CONTRIBUTING.md` for local generation, native-format tests, packaging and screenshots.
 - **Palette or shared semantic roles:** propose the change in core. Follow [Palette rollouts](docs/PALETTE-ROLLOUTS.md)

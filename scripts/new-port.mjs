@@ -16,6 +16,8 @@ export async function newPort(directory, manifest) {
   if (existing.length) throw new Error("Choose an empty output directory; existing port documentation must not be overwritten");
   const readme = renderPortReadme(manifest, { repository: `https://github.com/living-code-theme/${basename(resolve(directory))}` });
   await mkdir(join(directory, "images"), { recursive: true });
+  await mkdir(join(directory, "capture"), { recursive: true });
+  await cp(new URL("../templates/capture/README.md", import.meta.url), join(directory, "capture/README.md"));
   await cp(new URL("../templates/port/LICENSE", import.meta.url), join(directory, "LICENSE"));
   await writeFile(join(directory, "port.json"), JSON.stringify({ $schema: PORT_SCHEMA_URL, ...manifest }, null, 2) + "\n");
   await writeFile(join(directory, "README.md"), readme);
@@ -34,5 +36,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     images: values["no-images"] ? [] : flavors.map((flavor) => ({ flavor, path: `images/${flavor}.png`, alt: `${values.name} running Living Code ${FLAVOR_LABELS[flavor]?.name ?? flavor}` })),
   };
   await newPort(directory, manifest);
-  console.log(`Port scaffold created at ${directory}. Fill README placeholders, add real captures and theme files, then review before publishing.`);
+  console.log(`Port scaffold created at ${directory}. Follow capture/README.md: native 2560×1600 captures for every flavor, automatic capture CI and direct flavor-selected installation are required before publication.`);
 }

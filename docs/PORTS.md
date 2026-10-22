@@ -23,12 +23,14 @@ propose a prototype through the core port-request form. The short version:
    ```
 
    It creates a README from the shared template, `port.json` referencing the hosted schema, the MIT license and an
-   empty `images/` directory. It refuses non-empty directories. It does not write the theme, initialize Git, or create
+   empty `images/` directory plus `capture/README.md` with the mandatory capture/install checklist. It refuses non-empty directories. It does not write the theme, initialize Git, or create
    the palette pin, generator, package, tests or maintenance harness; those must be supplied/reviewed by the port.
 2. Add the theme files and port-owned maintainer tooling. Take every color from a semantic role in
    [`palette.json`](../palette.json), never from a hand-picked hex value, so the same kind of token gets the same
    color in every app.
-3. Add real screenshots of the application (never mockups) and fill in every README placeholder.
+3. Add an automated native capture recipe and real **2560×1600** screenshots for every supported flavor
+   (never mockups or upscaled smaller images). Fill README installation with direct, flavor-selected native
+   downloads, not clone/copy steps. Follow [the capture/install contract](PORT-CAPTURES.md).
 4. Preview it on the website without publishing, from this core checkout. Pass an existing landing checkout explicitly:
 
    ```sh
@@ -74,7 +76,10 @@ LICENSE
   "flavors": ["night", "frost", "paper", "signal"],
   "files": ["colors/living-code.lua", "lua/living-code/init.lua"],
   "images": [
-    { "flavor": "night", "path": "images/night.png", "alt": "Neovim running Living Code Night" }
+    { "flavor": "night", "path": "images/night.png", "alt": "Neovim running Living Code Night" },
+    { "flavor": "frost", "path": "images/frost.png", "alt": "Neovim running Living Code Frost" },
+    { "flavor": "paper", "path": "images/paper.png", "alt": "Neovim running Living Code Paper" },
+    { "flavor": "signal", "path": "images/signal.png", "alt": "Neovim running Living Code Signal" }
   ]
 }
 ```
@@ -83,7 +88,8 @@ The machine-readable contract is core's [`schemas/port.schema.json`](../schemas/
 checks repository paths and images. `pnpm build` exports the schema to `exports/landing/port.schema.json`.
 The website serves a committed copy at <https://living-code.dev/port.schema.json>; ports do not need a local copy.
 
-- Required: `schemaVersion`, `name`, `group`, `flavors`, `images` (`[]` when there are no captures yet).
+- Required: `schemaVersion`, `name`, `group`, `flavors`, `images`. The protocol still reads `[]` for legacy/draft
+  descriptors; a **new published port** must have an automatically captured 2560×1600 image for every flavor.
 - `slug` defaults to the repository name. Set it when they differ (`nvim` → `neovim`, `palette` → `json`). Published
   slugs are stable; discovery rejects a silent change.
 - `group` is a display label; a new group appears on the website automatically.
@@ -100,7 +106,9 @@ The website serves a committed copy at <https://living-code.dev/port.schema.json
 in this order:
 
 1. **Previews**: a 2×2 comparison grid of the real captures (Night, Frost, Paper, Signal).
-2. **Installation**: application-specific steps and working commands.
+2. **Installation**: application-specific native installation and activation. File-based ports use a temporary
+   `flavor=night` variable and quoted `curl --create-dirs` downloads to the correct app directory, preserving
+   existing config. Cloning/building is for maintainers, not the primary end-user installation.
 3. **Flavors**: one native `<details>` dropdown per supported flavor, with its capture and activation steps.
 4. **Configuration**: supported settings and defaults.
 5. **Compatibility**: real requirements, integrations and limitations. Do not invent supported versions.

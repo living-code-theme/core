@@ -319,7 +319,7 @@ Palette generation uses only Node built-ins; port tooling dependencies are devel
 | `pnpm check` | Fails if a generated file is stale or a text role drops below 4.5:1. CI runs it. |
 | `pnpm test` | Runs the test suite. |
 | `pnpm preview` | Live palette preview with sliders and exports at <http://localhost:4173/preview/>. |
-| `pnpm screenshots` | Recaptures `assets/preview-*.png` from the preview with headless Chrome (`CHROME_BIN` overrides `google-chrome`). |
+| `pnpm screenshots` | Recaptures `assets/preview-*.png` from the palette preview only, with headless Chrome (`CHROME_BIN` overrides `google-chrome`); app captures live in each port. |
 | `pnpm icons:brand` | Rasterizes the brand SVGs to PNG and ICO. See [`assets/brand`](assets/brand/README.md). |
 | `pnpm new:port <directory> --name "App" --group "Editors" --emoji "📝"` | Scaffolds a port's README, metadata and license, not its implementation or maintenance harness. |
 | `pnpm palette:update:ports --ports-root <directory>` | Plans a local palette rollout. Explicit `--apply` invokes each clean port's own updater, build, check and tests; never commits or pushes. |
@@ -340,7 +340,8 @@ to port-owned commands instead of generating application formats in core.
 The website takes committed inputs from [`exports/landing/`](exports/landing). After `pnpm build`, run
 `pnpm export:landing --landing <checkout>` and review the changes there. Port discovery, validation, templates and
 preview/verification runners live here in core; landing contains Astro and website presentation only. No normal
-website build imports core or needs GitHub access. See [Port repositories](docs/PORTS.md) for authoring and
+website build imports core or needs GitHub access. New ports require [automatic native 2560×1600 captures and direct flavor-selected installation](docs/PORT-CAPTURES.md).
+See [Port repositories](docs/PORTS.md) for authoring and
 [Port publication and capacity](docs/PORT-PUBLICATION.md) for the split index/documents, batched discovery,
 optional external capture storage and 400-port acceptance check.
 
