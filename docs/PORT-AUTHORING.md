@@ -1,7 +1,8 @@
 # Creating and contributing a port
 
 A port is an independently maintained application theme, not a new case in a central compiler. It owns its mappings,
-implementation, generator, tests, README, screenshots, version and release process.
+implementation, generator, tests, README and screenshots. A registry-backed package/extension also owns its version
+and release process; ordinary file ports do not need release workflows or package-release tags.
 
 For existing-port changes, start with that repository's `CONTRIBUTING.md`. For new ports, use the workflow below.
 The [agent and developer-tool expansion notes](PORT-EXPANSION.md) provide worked examples, upstream API references,
@@ -152,8 +153,9 @@ update keeps the port's last accepted website version. Manual dispatch of landin
 quicker maintainer feedback; normal local website builds do not refresh GitHub inputs.
 
 After deployment, check `/ports/<slug>/`, source/install links, screenshot flavors and compact installation details.
-A Git push publishes the source and makes it discoverable; app stores, registries and release assets still have their
-own explicit release/tag/submission requirements.
+A Git push publishes the source and makes it discoverable. Ordinary file ports stop there: do not add an automated
+GitHub Release just to archive downloadable theme files. Only registry-backed packages/extensions need explicit
+version/tag/release/submission operations; see [Packaging and publication](PUBLISHING.md).
 
 For later color updates, see [Palette rollouts](PALETTE-ROLLOUTS.md). For discovery/storage details and optional R2,
 see [Port publication and capacity](PORT-PUBLICATION.md).

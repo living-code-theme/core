@@ -183,6 +183,7 @@ Palette generation uses only Node built-ins; port tooling dependencies are devel
 | \`pnpm screenshots\` | Recaptures \`assets/preview-*.png\` from the palette preview only, with headless Chrome (\`CHROME_BIN\` overrides \`google-chrome\`); app captures live in each port. |
 | \`pnpm icons:brand\` | Rasterizes the brand SVGs to PNG and ICO. See [\`assets/brand\`](assets/brand/README.md). |
 | \`pnpm new:port <directory> --name "App" --group "Editors" --emoji "📝"\` | Scaffolds a port's README, metadata and license, not its implementation or maintenance harness. |
+| \`pnpm package:ports --ports-root <directory>\` | Plans publication packaging from port-owned metadata. Add \`--output <new-directory> --apply\` to collect packages, checksums and submission instructions; never publishes. See [Packaging and publication](docs/PUBLISHING.md). |
 | \`pnpm palette:update:ports --ports-root <directory>\` | Plans a local palette rollout. Explicit \`--apply\` invokes each clean port's own updater, build, check and tests; never commits or pushes. |
 | \`pnpm sync:ports --landing <checkout>\` | Discovers public ports and writes validated snapshots/captures to the website. Supports \`--dry-run\`, \`--refresh\` and optional \`--r2\` storage. |
 | \`pnpm preview:port <directory> --landing <checkout>\` | Validates a local port and previews it in an isolated website copy. |

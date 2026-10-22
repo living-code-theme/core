@@ -18,6 +18,7 @@
     "test:standalone": "node scripts/check-standalone.mjs",
     "test:scale": "node scripts/check-port-scale.mjs",
     "palette:update:ports": "node scripts/update-port-palettes.mjs",
+    "package:ports": "node scripts/package-ports.mjs",
     "new:port": "node scripts/new-port.mjs",
     "preview:port": "node scripts/preview-port.mjs",
     "sync:ports": "node scripts/sync-ports.mjs",
