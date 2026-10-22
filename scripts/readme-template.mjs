@@ -40,17 +40,20 @@ export function renderPortReadme(manifest, content = {}) {
     rows.push(`<tr>\n${pair.map((cell) => `<td width="${pair.length === 1 ? "100%" : "50%"}"${pair.length === 1 ? ' colspan="2"' : ""} valign="top">\n${cell}\n</td>`).join("\n")}\n</tr>`);
   }
   const missing = flavors.filter((id) => !images.has(id));
-  const previews = rows.length ? `<table data-lc-flavors>\n${rows.join("\n")}\n</table>\n\nSelect any preview to view the image at full size.` : "Real application screenshots have not been captured yet.";
+  const previews = rows.length ? `## Previews\n\n<table data-lc-flavors>\n${rows.join("\n")}\n</table>\n\nSelect any preview to view the image at full size.` : "";
   const blocks = {
     PORT_EMOJI: manifest.emoji ? html(manifest.emoji) : "{{PORT_EMOJI}}",
     PORT_NAME: html(manifest.name),
     DESCRIPTION: manifest.description ? html(manifest.description) : `A color theme for ${html(manifest.name)}.`,
     PREVIEWS: previews + (missing.length && rows.length ? `\n\n${missing.map((id) => FLAVOR_LABELS[id].name).join(", ")} ${missing.length === 1 ? "is" : "are"} supported; real captures are not available yet.` : ""),
     INSTALLATION: content.installation ?? "{{INSTALLATION}}",
-    FLAVORS: flavors.map((id) => `<details data-lc-flavor="${id}">\n<summary><strong>${FLAVOR_LABELS[id].name}</strong> · ${FLAVOR_LABELS[id].description}</summary>\n\n${images.has(id) ? `<p>${screenshot(images.get(id), 1280)}</p>` : "A real application capture is not available yet."}\n\n${content.flavorUsage?.[id] ?? `{{${id.toUpperCase()}_USAGE}}`}\n\n</details>`).join("\n\n"),
+    FLAVOR_INTRO: captures.length ? "Expand a flavor for its full-size preview and activation instructions." : "Expand a flavor for its activation instructions.",
+    FLAVORS: flavors.map((id) => `<details data-lc-flavor="${id}">\n<summary><strong>${FLAVOR_LABELS[id].name}</strong> · ${FLAVOR_LABELS[id].description}</summary>\n\n${images.has(id) ? `<p>${screenshot(images.get(id), 1280)}</p>\n\n` : ""}${content.flavorUsage?.[id] ?? `{{${id.toUpperCase()}_USAGE}}`}\n\n</details>`).join("\n\n"),
     CONFIGURATION: content.configuration ?? "{{CONFIGURATION}}",
     COMPATIBILITY: content.compatibility ?? "{{COMPATIBILITY}}",
     CONTRIBUTING: content.contributing ?? contributing(content.repository),
   };
-  return readFileSync(new URL("../templates/port/README.md", import.meta.url), "utf8").replace(/\{\{([A-Z_]+)\}\}/g, (token, key) => blocks[key] ?? token);
+  return readFileSync(new URL("../templates/port/README.md", import.meta.url), "utf8")
+    .replace("{{PREVIEWS}}\n\n", previews ? "{{PREVIEWS}}\n\n" : "")
+    .replace(/\{\{([A-Z_]+)\}\}/g, (token, key) => blocks[key] ?? token);
 }

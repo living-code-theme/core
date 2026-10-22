@@ -105,15 +105,22 @@ The website serves a committed copy at <https://living-code.dev/port.schema.json
 `README.md` is the port's only authored documentation. It follows the shared template, with these level-two sections
 in this order:
 
-1. **Previews**: a 2×2 comparison grid of the real captures (Night, Frost, Paper, Signal).
+1. **Previews**, only when `port.json` declares images: a 2×2 comparison grid of the real captures
+   (Night, Frost, Paper, Signal). Omit the entire section when `images` is empty; do not publish a
+   “screenshots have not been captured yet” placeholder.
 2. **Installation**: application-specific native installation and activation. File-based ports use a temporary
    `flavor=night` variable and quoted `curl --create-dirs` downloads to the correct app directory, preserving
    existing config. Cloning/building is for maintainers, not the primary end-user installation.
-3. **Flavors**: one native `<details>` dropdown per supported flavor, with its capture and activation steps.
+3. **Flavors**: one native `<details>` dropdown per supported flavor, with activation steps and its capture
+   when available. Image-free ports keep these instructions without preview wording or missing-capture notices.
 4. **Configuration**: supported settings and defaults.
 5. **Compatibility**: real requirements, integrations and limitations. Do not invent supported versions.
 6. **Contributing**
 7. **License**
+
+Image-free libraries and integrations must not promise an application preview that does not exist. This
+presentation rule does not waive the real-capture requirements for new application ports. Discovery continues
+to accept the older image-free layout so an unchanged published revision is not invalidated.
 
 The Contributing section links to the port's issue forms, which every repository inherits from
 [living-code-theme/.github](https://github.com/living-code-theme/.github), and to port requests in core.

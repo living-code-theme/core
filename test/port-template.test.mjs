@@ -58,7 +58,7 @@ test("two-flavor ports do not advertise unshipped flavors, and canonical order i
   assert.ok(source.indexOf('data-lc-flavor="night"') < source.indexOf('data-lc-flavor="paper"'));
 });
 
-test("missing captures are honest empty states, never placeholder or invented images", () => {
+test("previews only advertise real captures; image-free ports keep activation without empty screenshot sections", () => {
   const meta = manifest();
   meta.images = meta.images.slice(0, 1);
   const source = renderPortReadme(meta, prose);
@@ -68,9 +68,16 @@ test("missing captures are honest empty states, never placeholder or invented im
   meta.images = [];
   const empty = renderPortReadme(meta, prose);
   validateReadmeTemplate(empty, meta);
-  assert.match(empty, /Real application screenshots have not been captured yet/);
+  assert.doesNotMatch(empty, /## Previews|<table|<img|screenshots have not been captured|capture is not available|full-size preview/);
+  assert.deepEqual([...empty.matchAll(/^## (.+)$/gm)].map((m) => m[1]), README_SECTIONS.filter((section) => section !== "Previews"));
+  assert.match(empty, /Expand a flavor for its activation instructions/);
   assert.equal((empty.match(/<details /g) ?? []).length, 4);
+  for (const id of PORT_FLAVORS) assert.ok(empty.includes(prose.flavorUsage[id]));
   assert.deepEqual(readmeImagePaths(empty), []);
+  const legacy = empty.replace("## Installation", "## Previews\n\nReal application screenshots have not been captured yet.\n\n## Installation");
+  validateReadmeTemplate(legacy, meta);
+  assert.throws(() => validateReadmeTemplate(empty, manifest()), /README.md sections/);
+  assert.throws(() => validateReadmeTemplate(empty.replace("Expand a flavor for its activation instructions.", "{{FLAVOR_INTRO}}"), meta), /FLAVOR_INTRO/);
 });
 
 test("malformed template updates, unfinished scaffolds and flavor/metadata drift are rejected", () => {

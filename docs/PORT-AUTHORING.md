@@ -100,7 +100,9 @@ Follow [the port.json and README contract](PORTS.md). In particular:
   File-based themes use `flavor=night` and quoted `curl -fsSL --create-dirs` downloads straight into the native
   theme directory, honoring app/XDG overrides. Do not make users clone, `cd` or build. Preserve existing config;
   apps without an import feature need a separate downloaded fragment and a non-destructive merge.
-  Keep the README version marker, section order, comparison table and flavor dropdown attributes.
+  Keep the README version marker, section order and flavor dropdown attributes. Include the comparison table
+  and Previews section only when `port.json` declares images; image-free READMEs keep activation instructions
+  without empty preview sections or missing-screenshot notices.
 - Capture the actual application with the theme loaded for **every supported flavor**, at **2560×1600** with
   native 2× layout scale, never by upscaling. Vendor the reviewed runner and implement the app's own capture
   adapter, locked runtime, provenance and automatic CI refresh. Declared paths must exist and pass offline

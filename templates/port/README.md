@@ -5,8 +5,6 @@
 
 [Installation](#installation) · [Flavors](#flavors) · [Configuration](#configuration) · [All ports](https://github.com/living-code-theme)
 
-## Previews
-
 {{PREVIEWS}}
 
 ## Installation
@@ -16,7 +14,7 @@
 
 ## Flavors
 
-Expand a flavor for its full-size preview and activation instructions.
+{{FLAVOR_INTRO}}
 
 {{FLAVORS}}
 

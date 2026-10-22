@@ -61,10 +61,14 @@ function collectImages(html, paths) {
 /** The template is shared, but prose and activation instructions stay port-owned. */
 export function validateReadmeTemplate(source, manifest) {
   if (!source.trimStart().startsWith(README_MARKER)) throw new Error("README.md must use the Living Code port template v1 (see docs/PORTS.md)");
-  const placeholder = source.match(/\{\{(?:INSTALLATION|CONFIGURATION|COMPATIBILITY|PORT_EMOJI|PORT_NAME|DESCRIPTION|PREVIEWS|FLAVORS|(?:NIGHT|FROST|PAPER|SIGNAL)_USAGE)\}\}/);
+  const placeholder = source.match(/\{\{(?:INSTALLATION|CONFIGURATION|COMPATIBILITY|PORT_EMOJI|PORT_NAME|DESCRIPTION|PREVIEWS|FLAVOR_INTRO|FLAVORS|(?:NIGHT|FROST|PAPER|SIGNAL)_USAGE)\}\}/);
   if (placeholder) throw new Error(`Complete README.md placeholder ${placeholder[0]} before publishing`);
   const headings = new Marked({ gfm: true }).lexer(source).filter((t) => t.type === "heading");
-  if (headings.filter((t) => t.depth === 1).length !== 1 || headings.filter((t) => t.depth === 2).map((t) => t.text).join("\n") !== README_SECTIONS.join("\n")) throw new Error(`README.md sections must be: ${README_SECTIONS.join(", ")}; use ### for additional subsections`);
+  const sections = headings.filter((t) => t.depth === 2).map((t) => t.text);
+  // Previews are required for declared images, optional for legacy image-free READMEs.
+  // New scaffolds omit the empty section; existing published revisions remain readable.
+  const expectedSections = manifest.images.length || sections.includes("Previews") ? README_SECTIONS : README_SECTIONS.filter((section) => section !== "Previews");
+  if (headings.filter((t) => t.depth === 1).length !== 1 || sections.join("\n") !== expectedSections.join("\n")) throw new Error(`README.md sections must be: ${expectedSections.join(", ")}; use ### for additional subsections`);
   if (manifest.emoji && !headings.find((t) => t.depth === 1).text.startsWith(`${manifest.emoji} `)) throw new Error("README.md title must start with the port.json emoji");
   const dropdowns = [];
   const tables = [], details = [];
