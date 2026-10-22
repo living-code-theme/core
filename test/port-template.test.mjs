@@ -35,7 +35,7 @@ test("each port owns its title emoji while the shared chameleon mascot stays con
     const meta = { ...manifest(), name, emoji };
     const source = renderPortReadme(meta, prose);
     assert.ok(source.includes(`# ${emoji} Living Code for ${name}`));
-    assert.match(source, /🦎 \*\*One chameleon, many habitats\.\*\*/);
+    assert.match(source, /🦎 <b>One chameleon, many habitats\.<\/b>/);
     validateReadmeTemplate(source, meta);
     assert.throws(() => validateReadmeTemplate(source.replace(`# ${emoji} `, "# 🎨 "), meta), /title.*emoji/);
   }
@@ -68,7 +68,7 @@ test("previews only advertise real captures; image-free ports keep activation wi
   meta.images = [];
   const empty = renderPortReadme(meta, prose);
   validateReadmeTemplate(empty, meta);
-  assert.doesNotMatch(empty, /## Previews|<table|<img|screenshots have not been captured|capture is not available|full-size preview/);
+  assert.doesNotMatch(empty, /## Previews|<table|<img src="(?!https:)|screenshots have not been captured|capture is not available|full-size preview/);
   assert.deepEqual([...empty.matchAll(/^## (.+)$/gm)].map((m) => m[1]), README_SECTIONS.filter((section) => section !== "Previews"));
   assert.match(empty, /Expand a flavor for its activation instructions/);
   assert.equal((empty.match(/<details /g) ?? []).length, 4);
@@ -109,6 +109,17 @@ test("metadata text and alt text cannot inject HTML into the template", () => {
   assert.doesNotMatch(source, /<script>|alt="Screenshot " onerror=/);
   assert.match(source, /&lt;script&gt;/);
   assert.match(source, /&quot; onerror=&quot;/);
+});
+
+test("header badges use the port's repository and flavor count; GitHub stats need a repository", () => {
+  const source = renderPortReadme(manifest(["night", "paper"]), { repository: "https://github.com/living-code-theme/nvim" });
+  const header = source.split("\n## ")[0];
+  assert.match(header, /img\.shields\.io\/badge\/Living%20Code-2%20flavors-/);
+  for (const stat of ["stars", "issues", "last-commit"]) assert.ok(header.includes(`img.shields.io/github/${stat}/living-code-theme/nvim?style=for-the-badge`), stat);
+  assert.match(source.split("## License\n")[1], /img\.shields\.io\/badge\/license-MIT-/);
+  const bare = renderPortReadme(manifest(["night"])).split("\n## ")[0];
+  assert.match(bare, /Living%20Code-1%20flavor-/);
+  assert.doesNotMatch(bare, /img\.shields\.io\/github\//);
 });
 
 test("Contributing links the port's issue forms and core's port request form", () => {
