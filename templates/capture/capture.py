@@ -78,6 +78,16 @@ def has_application(state, application):
     return any(re.search(pattern, ' '.join(item.get('cmdline', []))) for item in processes)
 
 
+def renderer_env():
+    env = {'LIBGL_ALWAYS_SOFTWARE': '1'}
+    if mesa := os.environ.get('CAPTURE_MESA'):
+        # Both Xvfb's GLX server and Kitty's client must use the locked Mesa, not host drivers.
+        env.update(__EGL_VENDOR_LIBRARY_FILENAMES=f'{mesa}/share/glvnd/egl_vendor.d/50_mesa.json',
+                   __GLX_VENDOR_LIBRARY_NAME='mesa', LD_LIBRARY_PATH=f'{mesa}/lib',
+                   LIBGL_DRIVERS_PATH=f'{mesa}/lib/dri', GALLIUM_DRIVER='llvmpipe')
+    return env
+
+
 class Context:
     def __init__(self, root, home, flavor, display):
         self.root, self.home, self.flavor = root, home, flavor
@@ -93,12 +103,9 @@ class Context:
                         XDG_DATA_HOME=str(home / '.local/share'), XDG_STATE_HOME=str(home / '.local/state'),
                         XDG_RUNTIME_DIR=str(home / 'runtime'), TMPDIR=str(home / 'tmp'), DISPLAY=display,
                         LANG='C.UTF-8', LC_ALL='C.UTF-8', TERM='xterm-kitty', COLORTERM='truecolor',
-                        SHELL=shutil.which('bash') or '/bin/sh', LIBGL_ALWAYS_SOFTWARE='1',
+                        SHELL=shutil.which('bash') or '/bin/sh',
                         DBUS_SESSION_BUS_ADDRESS='unix:path=' + str(home / 'no-session-bus'))
-        if mesa := os.environ.get('CAPTURE_MESA'):
-            # libglvnd must use the locked Mesa vendor, not /run/opengl-driver from a NixOS host.
-            self.env.update(__EGL_VENDOR_LIBRARY_FILENAMES=f'{mesa}/share/glvnd/egl_vendor.d/50_mesa.json',
-                            LIBGL_DRIVERS_PATH=f'{mesa}/lib/dri', GALLIUM_DRIVER='llvmpipe')
+        self.env.update(renderer_env())
         for name in ('.config', '.cache', '.local/share', '.local/state', 'runtime', 'tmp'):
             (home / name).mkdir(parents=True, exist_ok=True)
         (home / 'runtime').chmod(0o700)
@@ -251,9 +258,11 @@ def capture(root, force=False, only=None):
     with tempfile.TemporaryDirectory(prefix='lc-shot-', dir='/tmp', ignore_cleanup_errors=True) as temporary:
         temporary = Path(temporary)
         display_file = temporary / 'display'
-        with display_file.open('w+') as output:
+        with display_file.open('w+') as output, (temporary / 'xvfb.log').open('w+') as xvfb_log:
             xvfb = subprocess.Popen(['Xvfb', '-displayfd', str(output.fileno()), '-screen', '0', f'{WIDTH}x{HEIGHT}x24',
-                                     '-nolisten', 'tcp', '-ac'], pass_fds=(output.fileno(),), stderr=subprocess.DEVNULL)
+                                     '-nolisten', 'tcp', '-ac'], pass_fds=(output.fileno(),), stderr=xvfb_log,
+                                    env={'PATH': os.environ['PATH'], 'HOME': str(temporary),
+                                         'TMPDIR': str(temporary), **renderer_env()})
             try:
                 for _ in range(100):
                     if display_file.read_text().strip():
@@ -305,6 +314,8 @@ def capture(root, force=False, only=None):
                     except Exception:
                         if context.process_log.exists():
                             print('Native process diagnostics:\n' + context.process_log.read_text(errors='replace')[-5000:], file=sys.stderr)
+                        xvfb_log.seek(0)
+                        print('Native display diagnostics:\n' + xvfb_log.read()[-3000:], file=sys.stderr)
                         raise
                     finally:
                         try:

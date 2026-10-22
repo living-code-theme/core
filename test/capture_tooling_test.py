@@ -109,7 +109,8 @@ class CaptureContract(unittest.TestCase):
     def test_isolated_app_environment_does_not_inherit_user_credentials_or_services(self):
         secrets = {'ANTHROPIC_API_KEY': 'do-not-inherit', 'OPENAI_API_KEY': 'do-not-inherit',
                    'GH_TOKEN': 'do-not-inherit', 'DOCKER_HOST': 'do-not-inherit', 'DBUS_SESSION_BUS_ADDRESS': 'do-not-inherit',
-                   '__EGL_VENDOR_LIBRARY_FILENAMES': 'do-not-inherit', 'LIBGL_DRIVERS_PATH': 'do-not-inherit'}
+                   '__EGL_VENDOR_LIBRARY_FILENAMES': 'do-not-inherit', 'LIBGL_DRIVERS_PATH': 'do-not-inherit',
+                   '__GLX_VENDOR_LIBRARY_NAME': 'do-not-inherit', 'LD_LIBRARY_PATH': 'do-not-inherit'}
         before = {key: os.environ.get(key) for key in [*secrets, 'CAPTURE_MESA']}
         try:
             os.environ.update(secrets, CAPTURE_MESA='/nix/store/locked-mesa')
@@ -124,6 +125,8 @@ class CaptureContract(unittest.TestCase):
             self.assertEqual(context.env['__EGL_VENDOR_LIBRARY_FILENAMES'], '/nix/store/locked-mesa/share/glvnd/egl_vendor.d/50_mesa.json')
             self.assertEqual(context.env['LIBGL_DRIVERS_PATH'], '/nix/store/locked-mesa/lib/dri')
             self.assertEqual(context.env['GALLIUM_DRIVER'], 'llvmpipe')
+            self.assertEqual(context.env['__GLX_VENDOR_LIBRARY_NAME'], 'mesa')
+            self.assertEqual(context.env['LD_LIBRARY_PATH'], '/nix/store/locked-mesa/lib')
         finally:
             for key, value in before.items():
                 if value is None:
