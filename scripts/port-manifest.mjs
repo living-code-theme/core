@@ -19,7 +19,7 @@ export function validateManifest(value, repositoryName) {
   const manifest = { ...value, slug: value.slug ?? repositoryName };
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.slug) || manifest.slug.length > 64 || RESERVED.has(manifest.slug)) throw new Error("port.json: invalid or reserved slug");
   if (!manifest.name.trim() || !manifest.group.trim() || (manifest.quick !== undefined && !manifest.quick.trim()) || (manifest.aliases ?? []).some((alias) => !alias.trim())) throw new Error("port.json: text fields cannot be blank");
-  if (manifest.emoji !== undefined && ([...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(manifest.emoji)].length !== 1 || !/\p{Extended_Pictographic}|^\p{Regional_Indicator}{2}$|^[0-9#*]\uFE0F?\u20E3$/u.test(manifest.emoji))) throw new Error("port.json: emoji must be a single emoji, not text or multiple emojis");
+  if (manifest.emoji !== undefined && ([...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(manifest.emoji)].length !== 1 || !/\p{Extended_Pictographic}|^\p{Regional_Indicator}{2}$|^[0-9#*]\uFE0F?\u20E3$|^(?![\p{ASCII}])[\p{L}\p{S}]\p{M}*$/u.test(manifest.emoji))) throw new Error("port.json: emoji must be a single emoji or non-ASCII symbol such as π, not text or multiple emojis");
   if (manifest.description !== undefined && manifest.description.trim().length < 40) throw new Error("port.json: description must contain at least 40 characters");
   if (manifest.homepage) {
     const url = new URL(manifest.homepage);

@@ -52,9 +52,9 @@ test("manifest schema allows new groups and defaults the slug to the repo name",
   assert.equal(validateManifest(manifest({ images: [] }), "nvim").images.length, 0);
 });
 
-test("port emojis are single Unicode graphemes, including variation selectors, modifiers and joined emoji", () => {
-  for (const emoji of ["📝", "🐈", "❄️", "👩🏽‍💻", "🇫🇷", "1️⃣"]) assert.equal(validateManifest(manifest({ emoji }), "nvim").emoji, emoji);
-  for (const emoji of ["", "nvim", "7", "📝🐈", " 📝", "📝 editor", "<script>", "📝\n"]) assert.throws(() => validateManifest(manifest({ emoji }), "nvim"), /emoji/);
+test("port emojis are single Unicode graphemes, including variation selectors, modifiers, joined emoji and symbols like π", () => {
+  for (const emoji of ["📝", "🐈", "❄️", "👩🏽‍💻", "🇫🇷", "1️⃣", "π", "λ", "∑"]) assert.equal(validateManifest(manifest({ emoji }), "nvim").emoji, emoji);
+  for (const emoji of ["", "nvim", "7", "a", "<", "π π", "ππ", "📝🐈", " 📝", "📝 editor", "<script>", "📝\n"]) assert.throws(() => validateManifest(manifest({ emoji }), "nvim"), /emoji/);
   assert.equal(validateManifest(manifest({ emoji: undefined }), "nvim").emoji, undefined, "older manifests remain compatible");
 });
 

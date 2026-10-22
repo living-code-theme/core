@@ -96,7 +96,7 @@ The website serves a committed copy at <https://living-code.dev/port.schema.json
 - `description` (40–300 characters), `homepage`, `quick` (a short plain-text label), `icon` (a Simple Icons slug),
   `aliases` and `files` are optional. Each listed file must exist and be at most 1 MiB.
 - `emoji` is one application-specific emoji for the README title: Neovim 📝, Kitty 🐈, Ghostty 👻, Firefox 🦊,
-  Obsidian 💎. The chameleon 🦎 is Living Code's own mascot and stays in the shared README footer.
+  Obsidian 💎. A single non-ASCII symbol is also accepted when it names the app better than any emoji, e.g. Pi π. The chameleon 🦎 is Living Code's own mascot and stays in the shared README footer.
 - `flavors` is a non-empty subset of `night`, `frost`, `paper`, `signal`. Browser themes ship Night and Paper only.
 - `images` lists at most one real screenshot per flavor: repository-relative PNG, JPEG or WebP, with alt text.
 
