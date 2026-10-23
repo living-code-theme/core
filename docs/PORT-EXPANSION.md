@@ -38,9 +38,10 @@ fingerprinted in the respective fixtures. Other ports record exact reviewed upst
 | [micro](https://github.com/living-code-theme/micro) | Native `.micro` `color-link` directives | Built-in syntax groups/subgroups, editor surfaces, diagnostics and search |
 | [posting](https://github.com/living-code-theme/posting) | Native YAML palette | Posting 3 UI, appearance and derived HTTP-method/syntax colors |
 
-A separate bat port was deliberately not added: the existing [tmTheme port](https://github.com/living-code-theme/tmtheme)
-already covers it and is now listed as the bat port (repository name unchanged). delta keeps its own port for diff
-styling and installs the same tmTheme files into bat's cache, which delta reads its syntax themes from. Rebranding an existing compatible theme or adding instructions for an inherited editor theme
+No second bat port was added: the existing tmTheme port already covered bat and is now the
+[bat port](https://github.com/living-code-theme/bat) (renamed from `tmtheme`). delta keeps its own port for diff
+styling and installs the same tmTheme files into bat's cache, which delta reads its syntax themes from. Rebranding
+an existing compatible theme or adding instructions for an inherited editor theme
 is not counted as a new application implementation.
 
 ## What every repository contains
