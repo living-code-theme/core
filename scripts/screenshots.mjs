@@ -32,7 +32,7 @@ try {
       "--headless", "--no-sandbox", "--disable-gpu", "--disable-background-networking",
       "--no-first-run", "--no-default-browser-check", "--hide-scrollbars",
       `--user-data-dir=${join(tmp, `profile-${id}`)}`,
-      "--window-size=1280,720", "--force-device-scale-factor=1", "--force-color-profile=srgb",
+      "--window-size=1280,800", "--force-device-scale-factor=2", "--force-color-profile=srgb",
       "--virtual-time-budget=2000", `--screenshot=${path}`, "--dump-dom", `${url}?shot=${id}`,
     ], { encoding: "utf8", timeout: 60000, maxBuffer: 4 * 1024 * 1024 });
     if (result.error?.code === "ENOENT") throw new Error(`Cannot find ${browser}. Install Chrome/Chromium or set CHROME_BIN.`);
@@ -42,7 +42,7 @@ try {
       throw new Error(`The ${id} preview did not finish rendering; existing images have not been replaced.`);
     }
     const png = await readFile(path);
-    if (png.toString("hex", 0, 8) !== "89504e470d0a1a0a" || png.readUInt32BE(16) !== 1280 || png.readUInt32BE(20) !== 720) {
+    if (png.toString("hex", 0, 8) !== "89504e470d0a1a0a" || png.readUInt32BE(16) !== 2560 || png.readUInt32BE(20) !== 1600) {
       throw new Error(`Unexpected screenshot format or dimensions for ${id}`);
     }
   }
